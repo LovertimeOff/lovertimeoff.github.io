@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>L'Overtime Manager — L'application tout-en-un pour le Rocket League compétitif</title>
+<meta name="description" content="L'Overtime Manager : overlays de diffusion, coaching et suivi de progression pour le Rocket League compétitif. Caster, joueur et coach dans un seul outil, prêt pour OBS." />
+<link rel="icon" href="logo.png" />
+<style>
+  :root{
+    --bg:#0b0a12; --bg2:#13121b; --card:#16151f; --card2:#1b1a26; --line:rgba(255,255,255,.10);
+    --txt:#e9ebf2; --muted:#9aa3b2; --brandA:#ff3048; --brandB:#984cff; --blue:#38a6ff; --orange:#ff8a1e;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;
+    background:
+      radial-gradient(1100px 640px at 12% -6%, rgba(190,0,0,.20), transparent 55%),
+      radial-gradient(1000px 620px at 92% 4%, rgba(120,36,200,.22), transparent 55%),
+      linear-gradient(180deg,#12111b 0%, var(--bg) 40%, #05050a 100%);
+    color:var(--txt);font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  .brand{font-weight:900;background:linear-gradient(135deg,var(--brandA),var(--brandB));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;border:1px solid var(--line);transition:transform .12s ease,box-shadow .12s ease}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(135deg,var(--brandA),var(--brandB));color:#fff;border:none;box-shadow:0 10px 30px rgba(152,76,255,.25)}
+  .btn-ghost{background:rgba(255,255,255,.04);color:var(--txt)}
+  .pro{display:inline-block;font-size:10px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--brandA),var(--brandB));
+    padding:2px 7px;border-radius:6px;margin-left:7px;vertical-align:middle;letter-spacing:.06em;line-height:1.5;white-space:nowrap}
+  .free-badge{display:inline-block;font-size:10px;font-weight:900;color:#0b0a12;background:#3bd16f;padding:2px 7px;border-radius:6px;margin-left:7px;vertical-align:middle;letter-spacing:.06em}
+  /* Header */
+  header{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);
+    background:rgba(11,10,18,.72);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0;gap:16px}
+  .logo{display:flex;align-items:center;gap:11px;font-weight:900;font-size:18px}
+  /* Fond dégradé de repli : si logo.png n'est pas à côté du fichier, on voit un
+     carré à la marque plutôt qu'une image cassée. */
+  .logo-img{width:34px;height:34px;border-radius:9px;object-fit:contain;background:linear-gradient(135deg,var(--brandA),var(--brandB))}
+  .logo-txt{display:flex;flex-direction:column;line-height:1.02}
+  .logo-name{font-weight:900;font-size:18px;letter-spacing:.01em}
+  .logo-sub{font-size:9.5px;font-weight:800;letter-spacing:.24em;color:var(--muted);text-transform:uppercase;margin-top:3px}
+  .nav .links{display:flex;gap:20px;align-items:center;font-size:14px;color:var(--muted)}
+  .nav .links a:hover{color:#fff}
+  .nav-right{display:flex;align-items:center;gap:12px}
+  .lang{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;
+    background:rgba(255,255,255,.04);cursor:pointer;font-size:13px;font-weight:800;color:var(--txt)}
+  .lang:hover{border-color:rgba(152,76,255,.5)}
+  .lang svg{width:15px;height:15px;opacity:.8}
+  /* Hero */
+  .hero{text-align:center;padding:64px 0 26px}
+  .hero h1{font-size:clamp(34px,6vw,60px);line-height:1.04;margin:0 0 16px;font-weight:900;letter-spacing:-.01em}
+  .hero p.lead{font-size:clamp(16px,2.3vw,20px);color:var(--muted);max-width:720px;margin:0 auto 26px}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;padding:6px 14px;border:1px solid var(--line);border-radius:999px;
+    font-size:13px;color:var(--muted);background:rgba(255,255,255,.03)}
+  .pill .d{width:7px;height:7px;border-radius:50%;background:#3bd16f;box-shadow:0 0 10px #3bd16f}
+  .microcopy{margin-top:14px;font-size:12.5px;color:var(--muted)}
+  /* App window mockups */
+  .win{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#14131d,#0e0d15);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .win-bar{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#100f18;border-bottom:1px solid var(--line)}
+  .win-logo{width:16px;height:16px;border-radius:5px;background:linear-gradient(135deg,var(--brandA),var(--brandB));flex:0 0 auto}
+  .win-bar .t{font-size:12px;color:var(--muted)}
+  .win-ctrls{margin-left:auto;display:flex;align-items:center;gap:16px;color:var(--muted)}
+  .win-ctrls b{display:inline-block;width:11px;height:11px;position:relative}
+  .win-ctrls b:nth-child(1)::after{content:"";position:absolute;left:0;bottom:2px;width:11px;height:1.5px;background:currentColor}
+  .win-ctrls b:nth-child(2){border:1.5px solid currentColor;border-radius:2px}
+  .win-ctrls b.x::before,.win-ctrls b.x::after{content:"";position:absolute;left:0;top:5px;width:12px;height:1.5px;background:currentColor}
+  .win-ctrls b.x::before{transform:rotate(45deg)}.win-ctrls b.x::after{transform:rotate(-45deg)}
+  .heroshot{max-width:940px;margin:14px auto 0}
+  /* Scorebug */
+  .field{background:
+      radial-gradient(600px 200px at 50% 120%, rgba(56,166,255,.18), transparent 60%),
+      linear-gradient(180deg,#0a1420,#0a0f1a);padding:34px 18px;display:flex;justify-content:center}
+  .scorebug{display:flex;align-items:stretch;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 12px 30px rgba(0,0,0,.4);font-weight:900}
+  .sb-team{display:flex;align-items:center;gap:10px;padding:12px 18px;background:rgba(12,14,22,.92);min-width:170px}
+  .sb-team.r{flex-direction:row-reverse;text-align:right}
+  .sb-logo{width:26px;height:26px;border-radius:6px}
+  .sb-logo.b{background:linear-gradient(135deg,#2b6fff,#38a6ff)}
+  .sb-logo.o{background:linear-gradient(135deg,#ff6a00,#ff8a1e)}
+  .sb-name{font-size:15px;letter-spacing:.02em}
+  .sb-score{display:flex;align-items:center;background:#05060a;color:#fff}
+  .sb-score .n{padding:12px 16px;font-size:22px}
+  .sb-score .sep{opacity:.35;font-size:15px}
+  .sb-clock{display:inline-block;margin:0 0 12px;background:linear-gradient(135deg,var(--brandA),var(--brandB));
+    color:#fff;font-size:11px;font-weight:800;padding:4px 14px;border-radius:999px;letter-spacing:.05em;white-space:nowrap}
+  .pips{display:flex;gap:5px;justify-content:center;margin-top:12px}
+  .pips i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.18)}
+  .pips i.b{background:#38a6ff}.pips i.o{background:#ff8a1e}
+  /* Sections. NB : les sections portent aussi la classe .wrap (max-width + padding
+     horizontal). Comme .wrap fixe padding:0 22px, elle ÉCRASE le padding vertical
+     d'une simple règle `section`. On repasse donc par un sélecteur plus spécifique
+     (section.wrap) pour rétablir de l'air en haut/bas de chaque bloc. */
+  section{padding:52px 0}
+  section.wrap{padding-top:82px;padding-bottom:20px}
+  section.wrap:last-of-type{padding-bottom:70px}
+  h2{font-size:clamp(25px,3.6vw,36px);font-weight:900;text-align:center;margin:0 0 8px;letter-spacing:-.01em}
+  .sub{color:var(--muted);text-align:center;max-width:640px;margin:0 auto 36px}
+  .kicker{display:block;text-align:center;font-size:12.5px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;
+    background:linear-gradient(135deg,var(--brandA),var(--brandB));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+  /* Spaces */
+  .spaces{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .space{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;padding:22px;position:relative;overflow:hidden}
+  .space::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--brandA),var(--brandB))}
+  .space .ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:rgba(152,76,255,.14);margin-bottom:12px;color:#cdb6ff}
+  .space h3{margin:0 0 6px;font-size:18px}
+  .space p{margin:0;color:var(--muted);font-size:14px}
+  /* Overview */
+  .shots{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .shot{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+  .shot .cap{padding:16px 18px}
+  .shot .cap h3{margin:0 0 4px;font-size:16px}
+  .shot .cap p{margin:0;color:var(--muted);font-size:13.5px}
+  .shot .art{padding:18px;background:linear-gradient(180deg,#12111c,#0d0c14);border-bottom:1px solid var(--line)}
+  /* Progression chart card */
+  .chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .chart-head .val{font-weight:900;font-size:15px}
+  .chart-head .up{font-size:12px;font-weight:800;color:#3bd16f;background:rgba(59,209,111,.12);padding:2px 8px;border-radius:999px}
+  /* Bracket */
+  .bracket text{fill:#cdd6e4;font-size:11px;font-weight:700}
+  .bracket line{stroke:rgba(255,255,255,.18)}
+  .bkt-box{fill:#1b1a26;stroke:rgba(255,255,255,.14)}
+  .bkt-win{stroke:var(--brandB)}
+  /* Builder */
+  .builder{position:relative;height:190px;border-radius:10px;background:
+      radial-gradient(500px 160px at 50% 120%, rgba(56,166,255,.14), transparent 60%),#0a0f18;overflow:hidden}
+  .blk{position:absolute;border:1.5px dashed rgba(152,76,255,.7);border-radius:7px;background:rgba(152,76,255,.06);
+    font-size:10px;color:#cdb6ff;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .blk.solid{border-style:solid;background:rgba(12,14,22,.92);color:#fff}
+  /* Features */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .feature{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;transition:border-color .15s ease,transform .15s ease}
+  .feature:hover{border-color:rgba(152,76,255,.45);transform:translateY(-2px)}
+  .feature h3{margin:10px 0 6px;font-size:16px;display:flex;align-items:center;flex-wrap:wrap}
+  .feature p{margin:0;color:var(--muted);font-size:13.5px}
+  .feature .ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+    background:rgba(152,76,255,.14);color:#cdb6ff}
+  .ic svg{width:21px;height:21px}
+  /* Pricing */
+  .prices{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:stretch}
+  .price{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;position:relative}
+  .price.best{border-color:rgba(152,76,255,.55);box-shadow:0 0 0 1px rgba(152,76,255,.25),0 24px 55px rgba(152,76,255,.14)}
+  .price .rib{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--brandA),var(--brandB));
+    color:#fff;font-size:10.5px;font-weight:900;padding:3px 12px;border-radius:999px;letter-spacing:.06em;white-space:nowrap}
+  .price .tag{font-size:13px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+  .price .amt{font-size:30px;font-weight:900;margin:8px 0 2px}
+  .price .amt small{font-size:14px;color:var(--muted);font-weight:600}
+  .price .note{font-size:13px;color:var(--muted);margin:2px 0 16px;min-height:20px}
+  .price ul{list-style:none;padding:0;margin:0 0 18px;font-size:13.5px;color:var(--muted)}
+  .price li{padding:6px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:flex-start}
+  .price li svg{width:15px;height:15px;flex:0 0 auto;margin-top:3px;color:#3bd16f}
+  .price .btn{margin-top:auto;text-align:center;justify-content:center}
+  .trial{font-size:11.5px;color:#3bd16f;font-weight:800;margin-bottom:12px}
+  /* FAQ */
+  .faq{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+  .qa{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .qa h4{margin:0 0 6px;font-size:15px}
+  .qa p{margin:0;color:var(--muted);font-size:14px}
+  /* Download */
+  .dlband{background:linear-gradient(135deg,rgba(255,48,72,.10),rgba(152,76,255,.12));border:1px solid var(--line);
+    border-radius:18px;padding:38px 26px;text-align:center}
+  /* Footer */
+  footer{border-top:1px solid var(--line);padding:34px 0 44px;color:var(--muted);font-size:14px;margin-top:20px}
+  .foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+  .foot .links{display:flex;gap:18px;flex-wrap:wrap}
+  .foot a:hover{color:#fff}
+  .mor{font-size:12.5px;color:var(--muted);margin-top:16px;max-width:820px;line-height:1.7}
+  .legalgrid{margin-top:26px;padding-top:22px;border-top:1px solid var(--line);display:grid;grid-template-columns:1.5fr 1fr;gap:26px}
+  .legal-links{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+  .legal-links a{color:#b79bff}.legal-links a:hover{color:#fff}
+  .cm2c{display:flex;gap:14px;align-items:flex-start}
+  .cm2c img{width:110px;height:110px;border-radius:10px;background:#fff;object-fit:contain;flex:0 0 auto}
+  @media(max-width:860px){.grid{grid-template-columns:1fr 1fr}.prices{grid-template-columns:1fr 1fr}.spaces{grid-template-columns:1fr}.shots{grid-template-columns:1fr}.nav .links{display:none}}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}.prices{grid-template-columns:1fr}.legalgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <div class="logo">
+      <img class="logo-img" src="logo.png" alt="L'Overtime logo" onerror="this.removeAttribute('src')" />
+      <span class="logo-txt">
+        <span class="logo-name" translate="no">L<span class="brand">'</span>Overtime</span>
+        <span class="logo-sub" translate="no">Manager</span>
+      </span>
+    </div>
+    <div class="nav-right">
+      <nav class="links">
+        <a href="#spaces" data-i18n="nav_spaces">Espaces</a>
+        <a href="#features" data-i18n="nav_features">Fonctionnalités</a>
+        <a href="#pricing" data-i18n="nav_pricing">Tarifs</a>
+        <a href="#download" data-i18n="nav_download">Télécharger</a>
+      </nav>
+      <button class="lang" id="langBtn" aria-label="Change language">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+        <span id="langLabel">FR</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main>
+  <!-- HERO -->
+  <div class="wrap hero">
+    <span class="pill"><span class="d"></span><span data-i18n="hero_pill">Caster, joueur et coach — un seul outil</span></span>
+    <h1 data-i18n-html="hero_h1">Le Rocket League compétitif,<br/><span class="brand">tout dans une appli</span></h1>
+    <p class="lead" data-i18n="hero_lead">L'Overtime Manager fait tourner ta diffusion, ton coaching et ton suivi de progression. Scoreboard en direct, brackets de tournoi, transitions, saisie de score à distance, constructeur d'overlay et courbes de progression — le tout prêt pour OBS.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#download" data-i18n="hero_cta1">Télécharger (gratuit)</a>
+      <a class="btn btn-ghost" href="#pricing" data-i18n="hero_cta2">Voir les tarifs</a>
+    </div>
+    <div class="microcopy" data-i18n="hero_micro">Windows · Gratuit pour démarrer · PRO sans engagement</div>
+
+    <div class="heroshot win">
+      <div class="win-bar">
+        <span class="win-logo"></span>
+        <span class="t" translate="no">L'Overtime Manager — Overlay</span>
+        <span class="win-ctrls"><b></b><b></b><b class="x"></b></span>
+      </div>
+      <div class="field">
+        <div style="text-align:center">
+          <div class="sb-clock" translate="no">3:47 · GAME 3</div>
+          <div class="scorebug">
+            <div class="sb-team"><span class="sb-logo b"></span><span class="sb-name" translate="no">ALPHA</span></div>
+            <div class="sb-score"><span class="n">2</span><span class="sep">:</span><span class="n">1</span></div>
+            <div class="sb-team r"><span class="sb-logo o"></span><span class="sb-name" translate="no">OMEGA</span></div>
+          </div>
+          <div class="pips"><i class="b"></i><i class="b"></i><i></i><i class="o"></i><i></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPACES -->
+  <section id="spaces" class="wrap">
+    <span class="kicker" data-i18n="spaces_kicker">Trois espaces, une appli</span>
+    <h2 data-i18n="spaces_title">Un outil pour toute la scène</h2>
+    <p class="sub" data-i18n="spaces_sub">Que tu castes, que tu joues ou que tu coaches, L'Overtime Manager s'adapte à ton rôle.</p>
+    <div class="spaces">
+      <div class="space">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+        <h3 data-i18n="space_caster_t">Caster</h3>
+        <p data-i18n="space_caster_d">Produis une diffusion pro : scoreboard live, tournois, transitions, scènes et overlay sur mesure, le tout piloté depuis l'appli.</p>
+      </div>
+      <div class="space">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12h4M8 10v4"/><circle cx="15" cy="11" r="1"/><circle cx="18" cy="13" r="1"/><rect x="2" y="6" width="20" height="12" rx="4"/></svg></div>
+        <h3 data-i18n="space_player_t">Joueur</h3>
+        <p data-i18n="space_player_d">Suis tes sessions, ton MMR et ta série en direct, affiche ton overlay de stream, et regarde ta progression match après match.</p>
+      </div>
+      <div class="space">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v13H4z"/><path d="M8 21h8M9 9l2 2 4-4"/></svg></div>
+        <h3 data-i18n="space_coach_t">Coach</h3>
+        <p data-i18n="space_coach_d">Gère ton roster, prépare tes tactiques, fixe des objectifs chiffrés à tes joueurs et suis leur progression sur des courbes claires.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERVIEW / SHOTS -->
+  <section id="overview" class="wrap">
+    <span class="kicker" data-i18n="ov_kicker">Aperçu</span>
+    <h2 data-i18n="ov_title">À quoi ça ressemble</h2>
+    <p class="sub" data-i18n="ov_sub">Un aperçu de ce que tu diffuses et de ce que tu analyses.</p>
+    <div class="shots">
+      <!-- Progression chart -->
+      <div class="shot">
+        <div class="art">
+          <div class="chart-head">
+            <span class="val" translate="no">MMR 2v2 · 2000</span>
+            <span class="up" translate="no">+512</span>
+          </div>
+          <svg viewBox="0 0 460 150" style="width:100%;height:auto;display:block">
+            <defs>
+              <linearGradient id="ln" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ff3048"/><stop offset="100%" stop-color="#984cff"/></linearGradient>
+              <linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(152,76,255,.30)"/><stop offset="100%" stop-color="rgba(152,76,255,.02)"/></linearGradient>
+            </defs>
+            <polygon fill="url(#fl)" points="8,120 8,96 40,99 70,92 100,101 130,88 160,90 190,72 220,78 250,58 280,63 310,44 340,50 370,30 400,36 440,16 440,120"/>
+            <polyline fill="none" stroke="url(#ln)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="8,96 40,99 70,92 100,101 130,88 160,90 190,72 220,78 250,58 280,63 310,44 340,50 370,30 400,36 440,16"/>
+            <circle cx="440" cy="16" r="4.5" fill="#fff" stroke="#984cff" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="cap"><h3 data-i18n="ov_s1_t">Progression &amp; coaching</h3><p data-i18n="ov_s1_d">Courbes de MMR et de stats, moyennes par joueur, objectifs de coach — l'évolution se lit d'un coup d'œil.</p></div>
+      </div>
+      <!-- Bracket -->
+      <div class="shot">
+        <div class="art">
+          <svg class="bracket" viewBox="0 0 460 150" style="width:100%;height:auto;display:block">
+            <rect class="bkt-box" x="6" y="10" width="120" height="24" rx="5"/><text x="16" y="26" translate="no">Alpha</text>
+            <rect class="bkt-box bkt-win" x="6" y="44" width="120" height="24" rx="5"/><text x="16" y="60" translate="no">Omega</text>
+            <rect class="bkt-box" x="6" y="86" width="120" height="24" rx="5"/><text x="16" y="102" translate="no">Nova</text>
+            <rect class="bkt-box bkt-win" x="6" y="120" width="120" height="24" rx="5"/><text x="16" y="136" translate="no">Vortex</text>
+            <line x1="126" y1="56" x2="150" y2="56"/><line x1="126" y1="132" x2="150" y2="132"/>
+            <line x1="150" y1="56" x2="150" y2="132"/><line x1="150" y1="94" x2="174" y2="94"/>
+            <rect class="bkt-box bkt-win" x="174" y="46" width="120" height="24" rx="5"/><text x="184" y="62" translate="no">Omega</text>
+            <rect class="bkt-box" x="174" y="106" width="120" height="24" rx="5"/><text x="184" y="122" translate="no">Vortex</text>
+            <line x1="294" y1="58" x2="318" y2="58"/><line x1="294" y1="118" x2="318" y2="118"/>
+            <line x1="318" y1="58" x2="318" y2="118"/><line x1="318" y1="88" x2="342" y2="88"/>
+            <rect class="bkt-box bkt-win" x="342" y="76" width="112" height="26" rx="6"/><text x="352" y="93" translate="no" style="fill:#fff">Omega</text>
+          </svg>
+        </div>
+        <div class="cap"><h3 data-i18n="ov_s2_t">Brackets de tournoi <span class="pro" translate="no">PRO</span></h3><p data-i18n="ov_s2_d">Élimination directe ou rondes suisses, Best-of par tour, et un match poussé à l'antenne en un clic.</p></div>
+      </div>
+      <!-- Builder -->
+      <div class="shot">
+        <div class="art">
+          <div class="builder">
+            <div class="blk solid" style="left:14px;top:16px;width:150px;height:34px" translate="no">ALPHA 2 : 1 OMEGA</div>
+            <div class="blk" style="left:180px;top:16px;width:90px;height:34px" data-i18n="blk_timer">Chrono</div>
+            <div class="blk" style="left:14px;top:64px;width:120px;height:60px" data-i18n="blk_logo">Logo équipe</div>
+            <div class="blk" style="left:150px;top:64px;width:150px;height:60px" data-i18n="blk_stats">Stats de fin</div>
+            <div class="blk" style="left:14px;top:134px;width:286px;height:38px" data-i18n="blk_lower">Bandeau / titre</div>
+          </div>
+        </div>
+        <div class="cap"><h3 data-i18n="ov_s3_t">Constructeur d'overlay <span class="pro" translate="no">PRO</span></h3><p data-i18n="ov_s3_d">Compose ton overlay bloc par bloc, place tout à la souris, sauvegarde tes designs et réutilise-les.</p></div>
+      </div>
+      <!-- Player overlay -->
+      <div class="shot">
+        <div class="art">
+          <div class="builder" style="height:auto;padding:18px 16px">
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+              <div style="background:rgba(12,14,22,.92);border:1px solid var(--line);border-radius:9px;padding:10px 14px;font-weight:900" translate="no">7V - 2D</div>
+              <div style="background:rgba(12,14,22,.92);border:1px solid var(--line);border-radius:9px;padding:10px 14px"><span style="color:#3bd16f;font-weight:900" translate="no">+126</span> <span style="color:var(--muted);font-size:12px" data-i18n="ov_mmr">MMR</span></div>
+              <div style="background:rgba(12,14,22,.92);border:1px solid var(--line);border-radius:9px;padding:10px 14px;font-weight:900;display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="15" height="15" fill="#ff8a1e"><path d="M12 2c1 3-1 4-1 6a3 3 0 0 0 5 2c1 2 2 3 2 6a6 6 0 0 1-12 0c0-4 3-5 3-8 0-2 2-3 3-6z"/></svg><span translate="no">5</span></div>
+              <div style="background:linear-gradient(135deg,var(--brandA),var(--brandB));border-radius:9px;padding:10px 14px;font-weight:900;color:#fff" translate="no">GC II</div>
+            </div>
+          </div>
+        </div>
+        <div class="cap"><h3 data-i18n="ov_s4_t">Overlay joueur pour ton stream <span class="free-badge" data-i18n="free_tag">GRATUIT</span></h3><p data-i18n="ov_s4_d">V/D de la session, MMR gagné, série en cours et rang — un overlay par défaut prêt à coller dans OBS, sans rien configurer.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="wrap">
+    <span class="kicker" data-i18n="feat_kicker">Fonctionnalités</span>
+    <h2 data-i18n="feat_title">Tout ce qu'il te faut à l'antenne</h2>
+    <p class="sub" data-i18n="feat_sub">Une seule appli pour piloter toute ta diffusion Rocket League.</p>
+    <div class="grid">
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M8 5v14"/></svg></div>
+        <h3 data-i18n="f1_t">Scoreboard en temps réel</h3><p data-i18n="f1_d">Scorebug synchronisé au jeu : scores, chrono, noms et logos d'équipe, score de série.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></div>
+        <h3 data-i18n="f2_t">Tournois <span class="pro" translate="no">PRO</span></h3><p data-i18n="f2_d">Brackets à élimination directe et rondes suisses, Best-of et horaires par tour, match poussé en un clic.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 9l5 3-5 3z"/></svg></div>
+        <h3 data-i18n="f3_t">Transitions &amp; scènes</h3><p data-i18n="f3_d">Ajoute des transitions entre tes scènes et déclenche-les sur les buts, directement depuis l'appli.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+        <h3 data-i18n="f4_t">Stats de fin de match</h3><p data-i18n="f4_d">Un tableau complet des stats de la partie, avec le MVP mis en avant.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></div>
+        <h3 data-i18n="f5_t">Saisie de score à distance <span class="pro" translate="no">PRO</span></h3><p data-i18n="f5_d">Un admin met à jour le score depuis n'importe quel téléphone ou PC, protégé par un code privé.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></div>
+        <h3 data-i18n="f6_t">Constructeur d'overlay <span class="pro" translate="no">PRO</span></h3><p data-i18n="f6_d">Compose ton overlay à partir de blocs, sauvegarde tes designs et partage-les.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H13l-4 3v-3H4z"/></svg></div>
+        <h3 data-i18n="f7_t">Interaction <span translate="no">Twitch</span> <span class="pro" translate="no">PRO</span></h3><p data-i18n="f7_d">Un mini-jeu de tir à la corde où ton chat vote pour faire pencher le show.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></div>
+        <h3 data-i18n="f8_t">Progression &amp; objectifs <span class="pro" translate="no">PRO</span></h3><p data-i18n="f8_d">Courbes de MMR et de stats, objectifs de coach chiffrés, et comparaison entre joueurs.</p>
+      </div>
+      <div class="feature">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></div>
+        <h3 data-i18n="f9_t">Overlay joueur <span class="free-badge" data-i18n="free_tag2">GRATUIT</span></h3><p data-i18n="f9_d">Un overlay de session prêt à l'emploi pour ton stream, sans configuration.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="wrap">
+    <span class="kicker" data-i18n="price_kicker">Tarifs</span>
+    <h2 data-i18n="price_title">Des tarifs simples</h2>
+    <p class="sub" data-i18n="price_sub">Commence gratuitement. Passe en PRO pour débloquer les fonctions premium. Sans engagement.</p>
+    <div class="prices">
+      <div class="price">
+        <div class="tag" data-i18n="p_free_tag">Gratuit</div>
+        <div class="amt">0 €</div>
+        <div class="note" data-i18n="p_free_note">Aucune licence requise</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_free_l1">Overlay &amp; scoreboard de diffusion</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_free_l2">Overlay joueur : V/D, MMR, série</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_free_l3">Scènes, transitions &amp; fin de match</span></li>
+        </ul>
+        <a class="btn btn-ghost" href="#download" data-i18n="p_free_btn">Télécharger</a>
+      </div>
+      <div class="price best">
+        <div class="rib" data-i18n="p_rib">Le plus flexible</div>
+        <div class="tag" data-i18n="p_m_tag">PRO Mensuel</div>
+        <div class="amt">5,99 € <small data-i18n="per_month">/ mois</small></div>
+        <div class="note" data-i18n="p_m_note">Facturé chaque mois</div>
+        <div class="trial" data-i18n="p_trial">Essai gratuit de 7 jours</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_m_l1">Tout le Gratuit</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_m_l2">Tournois, brackets &amp; score à distance</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_m_l3">Constructeur d'overlay &amp; interaction Twitch</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_m_l4">Progression, objectifs &amp; coaching</span></li>
+        </ul>
+        <a class="btn btn-primary" href="https://lovertime.lemonsqueezy.com/checkout/buy/f8a14b43-ca47-409d-9c47-7f0eb1c7560a" data-i18n="p_getpro">Passer en PRO</a>
+      </div>
+      <div class="price">
+        <div class="tag" data-i18n="p_6_tag">PRO 6 mois</div>
+        <div class="amt">29,99 € <small data-i18n="per_6mo">/ 6 mois</small></div>
+        <div class="note" data-i18n="p_6_note">≈ 5,00 € / mois</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_6_l1">Tout le PRO</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_6_l2">Économie vs mensuel</span></li>
+        </ul>
+        <a class="btn btn-primary" href="https://lovertime.lemonsqueezy.com/checkout/buy/f8a14b43-ca47-409d-9c47-7f0eb1c7560a" data-i18n="p_getpro2">Passer en PRO</a>
+      </div>
+      <div class="price">
+        <div class="tag" data-i18n="p_y_tag">PRO Annuel</div>
+        <div class="amt">54,99 € <small data-i18n="per_year">/ an</small></div>
+        <div class="note" data-i18n="p_y_note">≈ 4,58 € / mois — meilleur prix</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_y_l1">Tout le PRO</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_y_l2">Le meilleur tarif</span></li>
+        </ul>
+        <a class="btn btn-primary" href="https://lovertime.lemonsqueezy.com/checkout/buy/f8a14b43-ca47-409d-9c47-7f0eb1c7560a" data-i18n="p_getpro3">Passer en PRO</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="wrap">
+    <span class="kicker" data-i18n="faq_kicker">FAQ</span>
+    <h2 data-i18n="faq_title">Questions fréquentes</h2>
+    <div class="faq" style="margin-top:20px">
+      <div class="qa"><h4 data-i18n="q1">Comment ça marche ?</h4><p data-i18n="a1">Tu lances l'appli, tu ajoutes ton overlay comme source navigateur dans OBS, et c'est parti. Rien à installer d'autre, rien à coder.</p></div>
+      <div class="qa"><h4 data-i18n="q2">C'est fait pour qui ?</h4><p data-i18n="a2">Pour les casters, les joueurs et les coachs. Chacun a son espace dédié dans l'appli, avec ses outils.</p></div>
+      <div class="qa"><h4 data-i18n="q3">Faut-il créer un compte ?</h4><p data-i18n="a3">Non pour démarrer : le gratuit s'utilise tout de suite. Le PRO se débloque simplement en collant ta clé de licence.</p></div>
+      <div class="qa"><h4 data-i18n="q4">Comment activer le PRO ?</h4><p data-i18n="a4">Après l'achat, tu reçois une clé de licence à coller dans l'appli. Les abonnements sont gérés par Lemon Squeezy.</p></div>
+      <div class="qa"><h4 data-i18n="q5">Puis-je annuler quand je veux ?</h4><p data-i18n="a5">Oui. L'abonnement est sans engagement et s'annule à tout moment depuis ton espace Lemon Squeezy.</p></div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section id="download" class="wrap">
+    <div class="dlband">
+      <h2 data-i18n="dl_title">Télécharge L'Overtime Manager</h2>
+      <p class="sub" style="margin-bottom:22px" data-i18n="dl_sub">Récupère la dernière version Windows. Le PRO se débloque en collant ta clé de licence dans l'appli après l'achat.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://github.com/LovertimeOff/Lovertime-Releases/releases" data-i18n="dl_cta1">Télécharger (Windows)</a>
+        <a class="btn btn-ghost" href="https://discord.gg/DvPbPJhSuy" data-i18n="dl_cta2">Rejoindre le Discord</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div class="logo">
+        <img class="logo-img" src="logo.png" alt="L'Overtime logo" onerror="this.removeAttribute('src')" />
+        <span class="logo-txt">
+          <span class="logo-name" translate="no">L<span class="brand">'</span>Overtime</span>
+          <span class="logo-sub" translate="no">Manager</span>
+        </span>
+      </div>
+      <div class="links">
+        <a href="https://discord.gg/DvPbPJhSuy" translate="no">Discord</a>
+        <a href="https://github.com/LovertimeOff/Lovertime-Releases" translate="no">GitHub</a>
+        <a href="#pricing" data-i18n="nav_pricing">Tarifs</a>
+      </div>
+    </div>
+
+    <!-- LEGAL (contenu réel, conservé) -->
+    <div class="legalgrid">
+      <div>
+        <div style="font-weight:800;color:#e9ebf2;margin-bottom:8px" data-i18n="foot_legal">Mentions légales</div>
+        <div class="legal-links">
+          <a href="mentions-legales.html">Mentions légales</a>
+          <a href="cgv.html">CGV</a>
+          <a href="cgu.html">CGU / Licence</a>
+          <a href="confidentialite.html">Confidentialité</a>
+        </div>
+        <p style="font-size:12.5px;color:var(--muted);margin:0;line-height:1.65">
+          Éditeur : Harold Anguy — Entrepreneur individuel · APE 93.29Z · TVA non applicable (art. 293 B du CGI).<br/>
+          Contact : ministreducosmos@gmail.com — coordonnées complètes dans les <a href="mentions-legales.html" style="color:#b79bff">mentions légales</a>.<br/>
+          Hébergement : GitHub Pages (GitHub, Inc.). Paiements &amp; abonnements : Lemon Squeezy (Merchant of Record).
+        </p>
+      </div>
+      <div class="cm2c">
+        <img src="cm2c-mediateur.png" alt="Médiateur de la consommation CM2C" onerror="this.style.display='none'" />
+        <p style="font-size:12px;color:var(--muted);margin:0;line-height:1.6">
+          <b style="color:#e9ebf2">Médiation de la consommation.</b> Après une réclamation écrite restée sans solution, vous pouvez saisir gratuitement le médiateur <b>CM2C</b> — 49 rue de Ponthieu, 75008 Paris — <a href="https://www.cm2c.net/declarer-un-litige.php" style="color:#b79bff">cm2c.net/declarer-un-litige</a> — litiges@cm2c.net.
+        </p>
+      </div>
+    </div>
+
+    <p class="mor">© 2026 <span translate="no">L'Overtime Manager</span> — Harold Anguy. <span data-i18n="foot_trademark">Rocket League est une marque de Psyonix LLC ; L'Overtime est un produit indépendant, sans affiliation ni approbation de Psyonix. Les paiements et abonnements sont gérés par notre Merchant of Record, Lemon Squeezy.</span></p>
+  </div>
+</footer>
+
+<script>
+  const I18N = {
+    fr: {
+      nav_spaces:"Espaces", nav_features:"Fonctionnalités", nav_pricing:"Tarifs", nav_download:"Télécharger",
+      hero_pill:"Caster, joueur et coach — un seul outil",
+      hero_h1:"Le Rocket League compétitif,<br/><span class='brand'>tout dans une appli</span>",
+      hero_lead:"L'Overtime Manager fait tourner ta diffusion, ton coaching et ton suivi de progression. Scoreboard en direct, brackets de tournoi, transitions, saisie de score à distance, constructeur d'overlay et courbes de progression — le tout prêt pour OBS.",
+      hero_cta1:"Télécharger (gratuit)", hero_cta2:"Voir les tarifs",
+      hero_micro:"Windows · Gratuit pour démarrer · PRO sans engagement",
+      spaces_kicker:"Trois espaces, une appli", spaces_title:"Un outil pour toute la scène",
+      spaces_sub:"Que tu castes, que tu joues ou que tu coaches, L'Overtime Manager s'adapte à ton rôle.",
+      space_caster_t:"Caster", space_caster_d:"Produis une diffusion pro : scoreboard live, tournois, transitions, scènes et overlay sur mesure, le tout piloté depuis l'appli.",
+      space_player_t:"Joueur", space_player_d:"Suis tes sessions, ton MMR et ta série en direct, affiche ton overlay de stream, et regarde ta progression match après match.",
+      space_coach_t:"Coach", space_coach_d:"Gère ton roster, prépare tes tactiques, fixe des objectifs chiffrés à tes joueurs et suis leur progression sur des courbes claires.",
+      ov_kicker:"Aperçu", ov_title:"À quoi ça ressemble", ov_sub:"Un aperçu de ce que tu diffuses et de ce que tu analyses.",
+      ov_s1_t:"Progression & coaching", ov_s1_d:"Courbes de MMR et de stats, moyennes par joueur, objectifs de coach — l'évolution se lit d'un coup d'œil.",
+      ov_s2_t:"Brackets de tournoi", ov_s2_d:"Élimination directe ou rondes suisses, Best-of par tour, et un match poussé à l'antenne en un clic.",
+      ov_s3_t:"Constructeur d'overlay", ov_s3_d:"Compose ton overlay bloc par bloc, place tout à la souris, sauvegarde tes designs et réutilise-les.",
+      ov_s4_t:"Overlay joueur pour ton stream", ov_s4_d:"V/D de la session, MMR gagné, série en cours et rang — un overlay par défaut prêt à coller dans OBS, sans rien configurer.",
+      ov_mmr:"MMR", blk_timer:"Chrono", blk_logo:"Logo équipe", blk_stats:"Stats de fin", blk_lower:"Bandeau / titre",
+      free_tag:"GRATUIT", free_tag2:"GRATUIT",
+      feat_kicker:"Fonctionnalités", feat_title:"Tout ce qu'il te faut à l'antenne", feat_sub:"Une seule appli pour piloter toute ta diffusion Rocket League.",
+      f1_t:"Scoreboard en temps réel", f1_d:"Scorebug synchronisé au jeu : scores, chrono, noms et logos d'équipe, score de série.",
+      f2_t:"Tournois", f2_d:"Brackets à élimination directe et rondes suisses, Best-of et horaires par tour, match poussé en un clic.",
+      f3_t:"Transitions & scènes", f3_d:"Ajoute des transitions entre tes scènes et déclenche-les sur les buts, directement depuis l'appli.",
+      f4_t:"Stats de fin de match", f4_d:"Un tableau complet des stats de la partie, avec le MVP mis en avant.",
+      f5_t:"Saisie de score à distance", f5_d:"Un admin met à jour le score depuis n'importe quel téléphone ou PC, protégé par un code privé.",
+      f6_t:"Constructeur d'overlay", f6_d:"Compose ton overlay à partir de blocs, sauvegarde tes designs et partage-les.",
+      f7_t:"Interaction Twitch", f7_d:"Un mini-jeu de tir à la corde où ton chat vote pour faire pencher le show.",
+      f8_t:"Progression & objectifs", f8_d:"Courbes de MMR et de stats, objectifs de coach chiffrés, et comparaison entre joueurs.",
+      f9_t:"Overlay joueur", f9_d:"Un overlay de session prêt à l'emploi pour ton stream, sans configuration.",
+      price_kicker:"Tarifs", price_title:"Des tarifs simples", price_sub:"Commence gratuitement. Passe en PRO pour débloquer les fonctions premium. Sans engagement.",
+      p_free_tag:"Gratuit", p_free_note:"Aucune licence requise",
+      p_free_l1:"Overlay & scoreboard de diffusion", p_free_l2:"Overlay joueur : V/D, MMR, série", p_free_l3:"Scènes, transitions & fin de match", p_free_btn:"Télécharger",
+      p_rib:"Le plus flexible", p_m_tag:"PRO Mensuel", per_month:"/ mois", p_m_note:"Facturé chaque mois", p_trial:"Essai gratuit de 7 jours",
+      p_m_l1:"Tout le Gratuit", p_m_l2:"Tournois, brackets & score à distance", p_m_l3:"Constructeur d'overlay & interaction Twitch", p_m_l4:"Progression, objectifs & coaching", p_getpro:"Passer en PRO",
+      p_6_tag:"PRO 6 mois", per_6mo:"/ 6 mois", p_6_note:"≈ 5,00 € / mois", p_6_l1:"Tout le PRO", p_6_l2:"Économie vs mensuel", p_getpro2:"Passer en PRO",
+      p_y_tag:"PRO Annuel", per_year:"/ an", p_y_note:"≈ 4,58 € / mois — meilleur prix", p_y_l1:"Tout le PRO", p_y_l2:"Le meilleur tarif", p_getpro3:"Passer en PRO",
+      faq_kicker:"FAQ", faq_title:"Questions fréquentes",
+      q1:"Comment ça marche ?", a1:"Tu lances l'appli, tu ajoutes ton overlay comme source navigateur dans OBS, et c'est parti. Rien à installer d'autre, rien à coder.",
+      q2:"C'est fait pour qui ?", a2:"Pour les casters, les joueurs et les coachs. Chacun a son espace dédié dans l'appli, avec ses outils.",
+      q3:"Faut-il créer un compte ?", a3:"Non pour démarrer : le gratuit s'utilise tout de suite. Le PRO se débloque simplement en collant ta clé de licence.",
+      q4:"Comment activer le PRO ?", a4:"Après l'achat, tu reçois une clé de licence à coller dans l'appli. Les abonnements sont gérés par Lemon Squeezy.",
+      q5:"Puis-je annuler quand je veux ?", a5:"Oui. L'abonnement est sans engagement et s'annule à tout moment depuis ton espace Lemon Squeezy.",
+      dl_title:"Télécharge L'Overtime Manager", dl_sub:"Récupère la dernière version Windows. Le PRO se débloque en collant ta clé de licence dans l'appli après l'achat.",
+      dl_cta1:"Télécharger (Windows)", dl_cta2:"Rejoindre le Discord",
+      foot_legal:"Mentions légales",
+      foot_trademark:"Rocket League est une marque de Psyonix LLC ; L'Overtime est un produit indépendant, sans affiliation ni approbation de Psyonix. Les paiements et abonnements sont gérés par notre Merchant of Record, Lemon Squeezy."
+    },
+    en: {
+      nav_spaces:"Spaces", nav_features:"Features", nav_pricing:"Pricing", nav_download:"Download",
+      hero_pill:"Caster, player and coach — one tool",
+      hero_h1:"Competitive Rocket League,<br/><span class='brand'>all in one app</span>",
+      hero_lead:"L'Overtime Manager powers your broadcast, your coaching and your progress tracking. Live scoreboard, tournament brackets, transitions, remote score entry, an overlay builder and progress charts — all ready for OBS.",
+      hero_cta1:"Download (free)", hero_cta2:"See pricing",
+      hero_micro:"Windows · Free to start · PRO, cancel anytime",
+      spaces_kicker:"Three spaces, one app", spaces_title:"One tool for the whole scene",
+      spaces_sub:"Whether you cast, play or coach, L'Overtime Manager adapts to your role.",
+      space_caster_t:"Caster", space_caster_d:"Run a pro broadcast: live scoreboard, tournaments, transitions, scenes and a custom overlay, all controlled from the app.",
+      space_player_t:"Player", space_player_d:"Track your sessions, MMR and streak live, show your stream overlay, and watch your progress match after match.",
+      space_coach_t:"Coach", space_coach_d:"Manage your roster, prepare tactics, set numeric goals for your players and track their progress on clear charts.",
+      ov_kicker:"Overview", ov_title:"What it looks like", ov_sub:"A glimpse of what you broadcast and what you analyze.",
+      ov_s1_t:"Progress & coaching", ov_s1_d:"MMR and stat curves, per-player averages, coach goals — your evolution reads at a glance.",
+      ov_s2_t:"Tournament brackets", ov_s2_d:"Single-elimination or Swiss rounds, per-round Best-of, and a match pushed on air in one click.",
+      ov_s3_t:"Overlay builder", ov_s3_d:"Build your overlay block by block, place everything with the mouse, save your designs and reuse them.",
+      ov_s4_t:"Player overlay for your stream", ov_s4_d:"Session W/L, MMR gained, current streak and rank — a default overlay ready to drop into OBS, no setup.",
+      ov_mmr:"MMR", blk_timer:"Clock", blk_logo:"Team logo", blk_stats:"End stats", blk_lower:"Lower third / title",
+      free_tag:"FREE", free_tag2:"FREE",
+      feat_kicker:"Features", feat_title:"Everything you need on air", feat_sub:"One app to control your whole Rocket League broadcast.",
+      f1_t:"Real-time scoreboard", f1_d:"Scorebug synced to the game: scores, clock, team names and logos, series score.",
+      f2_t:"Tournaments", f2_d:"Single-elimination brackets and Swiss rounds, per-round Best-of and schedules, match pushed in one click.",
+      f3_t:"Transitions & scenes", f3_d:"Add transitions between your scenes and trigger them on goals, straight from the app.",
+      f4_t:"End-of-match stats", f4_d:"A full stat table for the game, with the MVP highlighted.",
+      f5_t:"Remote score entry", f5_d:"An admin updates the score from any phone or PC, secured by a private code.",
+      f6_t:"Overlay builder", f6_d:"Build your overlay from blocks, save your designs and share them.",
+      f7_t:"Twitch interaction", f7_d:"A tug-of-war mini-game where your chat votes to tip the show.",
+      f8_t:"Progress & goals", f8_d:"MMR and stat curves, numeric coach goals, and player-to-player comparison.",
+      f9_t:"Player overlay", f9_d:"A ready-to-use session overlay for your stream, no setup needed.",
+      price_kicker:"Pricing", price_title:"Simple pricing", price_sub:"Start free. Go PRO to unlock premium features. Cancel anytime.",
+      p_free_tag:"Free", p_free_note:"No license needed",
+      p_free_l1:"Broadcast overlay & scoreboard", p_free_l2:"Player overlay: W/L, MMR, streak", p_free_l3:"Scenes, transitions & end-of-match", p_free_btn:"Download",
+      p_rib:"Most flexible", p_m_tag:"PRO Monthly", per_month:"/ month", p_m_note:"Billed monthly", p_trial:"7-day free trial",
+      p_m_l1:"Everything in Free", p_m_l2:"Tournaments, brackets & remote score", p_m_l3:"Overlay builder & Twitch interaction", p_m_l4:"Progress, goals & coaching", p_getpro:"Go PRO",
+      p_6_tag:"PRO 6 months", per_6mo:"/ 6 mo", p_6_note:"≈ €5.00 / month", p_6_l1:"Everything in PRO", p_6_l2:"Save vs monthly", p_getpro2:"Go PRO",
+      p_y_tag:"PRO Annual", per_year:"/ year", p_y_note:"≈ €4.58 / month — best value", p_y_l1:"Everything in PRO", p_y_l2:"Best price", p_getpro3:"Go PRO",
+      faq_kicker:"FAQ", faq_title:"Frequently asked questions",
+      q1:"How does it work?", a1:"You launch the app, add your overlay as a browser source in OBS, and you're live. Nothing else to install, no code.",
+      q2:"Who is it for?", a2:"Casters, players and coaches. Each has a dedicated space in the app, with its own tools.",
+      q3:"Do I need an account?", a3:"Not to get started: the free version works right away. PRO simply unlocks by pasting your license key.",
+      q4:"How do I activate PRO?", a4:"After purchase you get a license key to paste into the app. Subscriptions are handled by Lemon Squeezy.",
+      q5:"Can I cancel anytime?", a5:"Yes. The subscription has no commitment and can be canceled anytime from your Lemon Squeezy account.",
+      dl_title:"Download L'Overtime Manager", dl_sub:"Grab the latest Windows build. PRO unlocks by pasting your license key into the app after purchase.",
+      dl_cta1:"Download (Windows)", dl_cta2:"Join the Discord",
+      foot_legal:"Legal",
+      foot_trademark:"Rocket League is a trademark of Psyonix LLC; L'Overtime is an independent product, not affiliated with or endorsed by Psyonix. Payments and subscriptions are handled by our Merchant of Record, Lemon Squeezy."
+    }
+  };
+  function applyLang(l){
+    if(!I18N[l]) l = "en";
+    document.documentElement.lang = l;
+    document.querySelectorAll('[data-i18n]').forEach(function(el){ var k=el.getAttribute('data-i18n'); if(I18N[l][k]!=null) el.textContent=I18N[l][k]; });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(el){ var k=el.getAttribute('data-i18n-html'); if(I18N[l][k]!=null) el.innerHTML=I18N[l][k]; });
+    document.getElementById('langLabel').textContent = (l==='fr'?'FR':'EN');
+    try{ localStorage.setItem('ov_lang', l); }catch(e){}
+  }
+  (function(){
+    var saved=null; try{ saved=localStorage.getItem('ov_lang'); }catch(e){}
+    var initial = saved || ((navigator.language||'en').toLowerCase().indexOf('fr')===0 ? 'fr':'en');
+    applyLang(initial);
+    document.getElementById('langBtn').addEventListener('click', function(){
+      var cur = document.documentElement.lang==='fr' ? 'fr':'en';
+      applyLang(cur==='fr' ? 'en':'fr');
+    });
+  })();
+</script>
+</body>
+</html>
