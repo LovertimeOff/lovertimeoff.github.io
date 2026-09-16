@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>L'Overtime Manager, l'application tout-en-un pour le Rocket League compétitif</title>
+<meta name="description" content="L'Overtime Manager : overlays de diffusion, coaching et suivi de progression pour le Rocket League compétitif. Caster, joueur et coach dans un seul outil." />
+<meta property="og:title" content="L'Overtime Manager" />
+<meta property="og:description" content="Overlays de diffusion, coaching et suivi de progression pour le Rocket League compétitif." />
+<meta property="og:image" content="logo.png" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="fr_FR" />
+<link rel="icon" href="logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07060c; --card:#14131e; --card2:#1a1926; --line:rgba(255,255,255,.09);
+    --txt:#eef0f6; --muted:#9aa3b2; --brandA:#ff3048; --brandB:#984cff; --val:#ff4655;
+    --disp:"Rajdhani","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;overflow-x:hidden;background:linear-gradient(180deg,#0b0a14 0%, var(--bg) 45%, #030308 100%);
+    color:var(--txt);font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.55}
+  .amb{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(1200px 700px at 15% -8%, rgba(190,0,40,.20), transparent 55%),
+      radial-gradient(1100px 680px at 88% 2%, rgba(120,36,200,.22), transparent 55%),
+      radial-gradient(900px 900px at 50% 120%, rgba(56,166,255,.09), transparent 60%);
+    animation:amb 20s ease-in-out infinite alternate}
+  .amb::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 120% at 50% 40%,transparent 55%,rgba(0,0,0,.55))}
+  @keyframes amb{from{transform:translate3d(-1.5%,-1%,0) scale(1)}to{transform:translate3d(2%,1.5%,0) scale(1.06)}}
+  main,header,footer{position:relative;z-index:1}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  .brand{background:linear-gradient(135deg,var(--brandA),var(--brandB));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 24px;border-radius:13px;font-weight:800;font-size:15px;cursor:pointer;border:1px solid var(--line);transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s ease}
+  .btn:hover{transform:translateY(-2px)}
+  .btn-primary{background:linear-gradient(135deg,var(--brandA),var(--brandB));color:#fff;border:none;box-shadow:0 12px 34px rgba(152,76,255,.28)}
+  .btn-primary:hover{box-shadow:0 18px 46px rgba(152,76,255,.42)}
+  .btn-ghost{background:rgba(255,255,255,.04);color:var(--txt)}
+  .pro{display:inline-block;font-size:10px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--brandA),var(--brandB));padding:2px 7px;border-radius:6px;margin-left:7px;vertical-align:middle;letter-spacing:.06em;line-height:1.5;white-space:nowrap}
+  .free-badge{display:inline-block;font-size:10px;font-weight:900;color:#07060c;background:#3bd16f;padding:2px 7px;border-radius:6px;margin-left:7px;vertical-align:middle;letter-spacing:.06em}
+  .soon-badge{display:inline-block;font-size:11px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--val),#ff7a54);padding:3px 10px;border-radius:7px;vertical-align:middle;letter-spacing:.08em}
+  .scrollbar{position:fixed;top:0;left:0;height:2px;width:0;z-index:60;background:linear-gradient(90deg,var(--brandA),var(--brandB));box-shadow:0 0 14px rgba(152,76,255,.7)}
+  header{position:sticky;top:0;z-index:40;backdrop-filter:blur(12px);background:rgba(7,6,12,.6);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:13px 0;gap:16px}
+  .logo{display:flex;align-items:center;gap:11px;font-weight:900;font-size:18px}
+  .logo-img{width:34px;height:34px;border-radius:9px;object-fit:contain;background:linear-gradient(135deg,var(--brandA),var(--brandB))}
+  .logo-txt{display:flex;flex-direction:column;line-height:1.02}
+  .logo-name{font-weight:900;font-size:18px}
+  .logo-sub{font-size:9.5px;font-weight:800;letter-spacing:.24em;color:var(--muted);text-transform:uppercase;margin-top:3px}
+  .nav .links{display:flex;gap:22px;align-items:center;font-size:14px;color:var(--muted)}
+  .nav .links a{position:relative}
+  .nav .links a::after{content:"";position:absolute;left:0;bottom:-4px;height:1.5px;width:0;background:linear-gradient(90deg,var(--brandA),var(--brandB));transition:width .25s ease}
+  .nav .links a:hover{color:#fff}.nav .links a:hover::after{width:100%}
+  .nav-right{display:flex;align-items:center;gap:12px}
+  .lang{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.04);cursor:pointer;font-size:13px;font-weight:800;color:var(--txt)}
+  .lang:hover{border-color:rgba(152,76,255,.5)}
+  .lang svg{width:15px;height:15px;opacity:.8}
+  /* HERO */
+  .cine{position:relative;height:300vh}
+  .cine-stage{height:100vh;overflow:hidden;display:flex;align-items:center}
+  .cine-inner{max-width:1180px;margin:0 auto;padding:0 24px;width:100%;display:grid;grid-template-columns:1.02fr 1.18fr;gap:34px;align-items:center}
+  .cine-copy{will-change:transform,opacity}
+  .cine-pill{display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;padding:6px 14px;border:1px solid var(--line);border-radius:999px;font-size:12.5px;color:var(--muted);background:rgba(255,255,255,.03)}
+  .cine-pill .d{width:7px;height:7px;border-radius:50%;background:#3bd16f;box-shadow:0 0 10px #3bd16f}
+  .cine-copy h1{font-family:var(--disp);font-size:clamp(42px,5.8vw,74px);line-height:.98;margin:0 0 18px;font-weight:700;letter-spacing:.005em}
+  .cine-copy .lead{font-size:clamp(16px,1.5vw,19px);color:var(--muted);max-width:520px;margin:0 0 26px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .microcopy{margin-top:16px;font-size:12.5px;color:var(--muted)}
+  .scene{perspective:1500px;perspective-origin:55% 45%;display:flex;justify-content:center}
+  .ovwrap{position:relative;width:min(560px,92%);transform-style:preserve-3d;will-change:transform}
+  .ovwrap::before{content:"";position:absolute;left:8%;right:8%;top:18%;bottom:-14%;
+    background:radial-gradient(60% 60% at 50% 50%, rgba(152,76,255,.4), transparent 70%);filter:blur(38px);z-index:-1}
+  .ovscene-tag{position:absolute;top:-26px;left:2px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  /* player overlay badge (faithful recreation) */
+  .ovbadge{position:relative;border-radius:16px;padding:2px;filter:drop-shadow(0 26px 60px rgba(0,0,0,.6))}
+  .ovshield{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+  .ovface{position:relative;z-index:1;margin:6px;border-radius:13px;background:linear-gradient(180deg,rgba(18,16,23,.92),rgba(12,11,18,.96));
+    border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:16px;padding:16px 20px}
+  .rankemblem{width:58px;height:58px;flex:0 0 auto;position:relative;display:flex;align-items:center;justify-content:center}
+  .rankemblem svg{width:100%;height:100%;filter:drop-shadow(0 3px 10px rgba(152,76,255,.5))}
+  .rankwrap{display:flex;flex-direction:column;line-height:1;font-family:var(--disp)}
+  .rankwrap .rn{font-size:26px;font-weight:700;letter-spacing:.02em}
+  .rankwrap .rl{font-size:11px;font-weight:600;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-top:5px}
+  .ovsep{width:1px;align-self:stretch;background:linear-gradient(180deg,transparent,rgba(255,255,255,.18),transparent)}
+  .ovstats{display:flex;gap:16px;font-family:var(--disp)}
+  .ovstat{display:flex;flex-direction:column;line-height:1}
+  .ovstat b{font-size:24px;font-weight:700;letter-spacing:.01em}
+  .ovstat .g{color:#3bd16f}.ovstat .fire{color:#ff8a1e}
+  .ovstat small{font-size:10.5px;font-weight:600;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-top:6px}
+  .ovmeta{margin-top:14px;text-align:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .cine-hint{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-size:11.5px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .cine-hint .mouse{width:20px;height:32px;border:1.5px solid var(--muted);border-radius:12px;position:relative}
+  .cine-hint .mouse::after{content:"";position:absolute;left:50%;top:6px;width:2px;height:6px;background:var(--muted);transform:translateX(-50%);border-radius:2px;animation:wheel 1.5s ease-in-out infinite}
+  @keyframes wheel{0%{opacity:0;transform:translate(-50%,0)}40%{opacity:1}100%{opacity:0;transform:translate(-50%,10px)}}
+  /* SECTIONS */
+  section{padding:70px 0}
+  .kicker{display:block;text-align:center;font-family:var(--disp);font-size:14px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;background:linear-gradient(135deg,var(--brandA),var(--brandB));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+  .kicker.val{background:linear-gradient(135deg,var(--val),#ff9d6b);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-family:var(--disp);font-size:clamp(30px,4vw,46px);font-weight:700;text-align:center;margin:0 0 12px;letter-spacing:.01em}
+  .sub{color:var(--muted);text-align:center;max-width:660px;margin:0 auto 44px}
+  .divider{height:1px;max-width:1120px;margin:0 auto;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent)}
+  /* Horizontal espaces */
+  .hspaces-head{padding-top:20px}
+  .hpin{position:relative;height:320vh}
+  .hpin-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden}
+  .hpin-track{display:flex;gap:28px;padding:0 max(24px,6vw);will-change:transform}
+  .hpanel{flex:0 0 min(760px,80vw);height:64vh;border-radius:22px;padding:34px;display:flex;flex-direction:column;justify-content:space-between;
+    background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);position:relative;overflow:hidden}
+  .hpanel::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,var(--brandA),var(--brandB))}
+  .hpanel .num{font-family:var(--disp);font-size:74px;font-weight:700;line-height:1;color:transparent;-webkit-text-stroke:1.5px rgba(152,76,255,.55)}
+  .hpanel .ic{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(152,76,255,.15);color:#cdb6ff;margin-bottom:14px}
+  .hpanel .ic svg{width:26px;height:26px}
+  .hpanel h3{font-family:var(--disp);font-size:32px;font-weight:700;margin:0 0 10px;letter-spacing:.01em}
+  .hpanel p{margin:0;color:var(--muted);font-size:16px;max-width:520px}
+  .hpanel .head{display:flex;flex-direction:column}
+  .hvisual{flex:1;min-height:120px;margin:20px 0;border-radius:14px;border:1px solid var(--line);background:linear-gradient(180deg,#0e0d16,#0a0910);display:flex;align-items:center;justify-content:center;padding:22px;position:relative;overflow:hidden}
+  .hvisual::after{content:"";position:absolute;inset:0;background:radial-gradient(420px 170px at 50% 120%, rgba(152,76,255,.16), transparent 60%);pointer-events:none}
+  .msb{display:flex;align-items:stretch;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.12);font-weight:700;font-family:var(--disp);box-shadow:0 12px 30px rgba(0,0,0,.4);position:relative;z-index:1}
+  .msb .t{display:flex;align-items:center;gap:8px;padding:11px 15px;background:rgba(10,12,20,.94);font-size:15px}
+  .msb .t.r{flex-direction:row-reverse}
+  .msb .lg{width:20px;height:20px;border-radius:5px}
+  .msb .lg.b{background:linear-gradient(135deg,#2b6fff,#38a6ff)}.msb .lg.o{background:linear-gradient(135deg,#ff6a00,#ff8a1e)}
+  .msb .sc{display:flex;align-items:center;background:#05060a;color:#fff}.msb .sc .n{padding:11px 14px;font-size:20px}.msb .sc .s{opacity:.35}
+  .mclock{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--brandA),var(--brandB));color:#fff;font-size:10px;font-weight:800;padding:3px 12px;border-radius:999px;letter-spacing:.05em;z-index:2;white-space:nowrap}
+  .mrow{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;background:rgba(10,12,20,.6);border:1px solid var(--line);border-radius:9px;padding:9px 13px;font-size:13px;position:relative;z-index:1}
+  .mrow b{font-family:var(--disp)}
+  .hpanel .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .hpanel .tag{font-size:12px;font-weight:700;color:#cdb6ff;background:rgba(152,76,255,.12);border:1px solid rgba(152,76,255,.25);border-radius:999px;padding:5px 11px}
+  .hprog{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.06)}
+  .hprog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brandA),var(--brandB))}
+  /* Overview / shots */
+  .shots{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .shot{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s ease,border-color .2s ease}
+  .shot:hover{transform:translateY(-4px);border-color:rgba(152,76,255,.35)}
+  .shot .cap{padding:16px 18px}.shot .cap h3{margin:0 0 4px;font-size:16px}.shot .cap p{margin:0;color:var(--muted);font-size:13.5px}
+  .shot .art{padding:18px;background:linear-gradient(180deg,#12111c,#0c0b13);border-bottom:1px solid var(--line)}
+  .chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .chart-head .val{font-weight:900;font-size:15px;font-family:var(--disp)}
+  .chart-head .up{font-size:12px;font-weight:800;color:#3bd16f;background:rgba(59,209,111,.12);padding:2px 8px;border-radius:999px}
+  .bracket text{fill:#cdd6e4;font-size:11px;font-weight:700}.bracket line{stroke:rgba(255,255,255,.18)}
+  .bkt-box{fill:#1a1926;stroke:rgba(255,255,255,.14)}.bkt-win{stroke:var(--brandB)}
+  .builder{position:relative;height:190px;border-radius:10px;background:radial-gradient(500px 160px at 50% 120%, rgba(56,166,255,.14), transparent 60%),#0a0f18;overflow:hidden}
+  .blk{position:absolute;border:1.5px dashed rgba(152,76,255,.7);border-radius:7px;background:rgba(152,76,255,.06);font-size:10px;color:#cdb6ff;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .blk.solid{border-style:solid;background:rgba(10,12,20,.92);color:#fff}
+  /* Features */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .feature{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;transition:border-color .18s ease,transform .18s ease}
+  .feature:hover{border-color:rgba(152,76,255,.45);transform:translateY(-3px)}
+  .feature h3{margin:12px 0 6px;font-size:16px;display:flex;align-items:center;flex-wrap:wrap}
+  .feature p{margin:0;color:var(--muted);font-size:13.5px}
+  .feature .ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(152,76,255,.14);color:#cdb6ff}
+  .ic svg{width:21px;height:21px}
+  /* Valorant */
+  .valsec{position:relative;background:radial-gradient(1100px 620px at 82% 14%, rgba(255,70,85,.13), transparent 58%),radial-gradient(840px 580px at 6% 90%, rgba(152,76,255,.11), transparent 58%)}
+  .val3d-wrap{position:relative;height:230vh}
+  .val3d-stage{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;perspective:1000px;overflow:hidden}
+  .valburst{position:absolute;left:50%;top:48%;width:130vw;height:130vw;transform:translate(-50%,-50%) scale(.5);border-radius:50%;opacity:0;pointer-events:none;
+    background:radial-gradient(circle, rgba(255,70,85,.24), rgba(255,70,85,.05) 45%, transparent 62%)}
+  .valflash{position:absolute;inset:0;opacity:0;pointer-events:none;background:radial-gradient(circle at 50% 52%, rgba(255,150,160,.42), transparent 58%)}
+  .val3dscale{position:relative;z-index:2;transform-style:preserve-3d;will-change:transform}
+  .val3d{display:flex;gap:.008em;transform-style:preserve-3d;animation:valfloat 7s ease-in-out infinite alternate}
+  @keyframes valfloat{from{transform:rotateY(-9deg) rotateX(5deg)}to{transform:rotateY(9deg) rotateX(-3deg)}}
+  .val3d span{display:inline-block;font-family:var(--disp);font-weight:700;font-size:clamp(56px,13.5vw,190px);line-height:.9;letter-spacing:.004em;color:#ff4655;transform-style:preserve-3d;backface-visibility:hidden;will-change:transform,opacity;
+    text-shadow:1px 1px 0 #c12f3a,2px 2px 0 #a92732,3px 3px 0 #91202b,4px 5px 1px rgba(0,0,0,.4),0 0 26px rgba(255,70,85,.42)}
+  .val3d .sp{width:.12em}
+  #soon3d span{font-size:clamp(46px,10vw,140px)}
+  /* Scène Valorant unique : construction / déconstruction en place */
+  .valstage-wrap{position:relative;height:440vh}
+  .valstage{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;perspective:1000px}
+  .vlayer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;will-change:transform,opacity}
+  .vlayer .wrap{width:100%}
+  .valreveal{position:relative;height:210vh}
+  .valreveal-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden}
+  .valgrid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:stretch;margin-top:22px;perspective:1300px}
+  .valcard{background:linear-gradient(180deg,#17121a,#110c15);border:1px solid var(--line);border-radius:18px;padding:22px;position:relative;overflow:hidden;transition:transform .2s ease;transform-style:preserve-3d;will-change:transform,opacity}
+  .valcard:hover{transform:translateY(-4px)}
+  .valcard::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--val),#ff9d6b)}
+  .valcard h3{font-family:var(--disp);margin:2px 0 4px;font-size:19px;font-weight:700}.valcard p{margin:0;color:var(--muted);font-size:13.5px}
+  .valmock{background:linear-gradient(180deg,#120d16,#0b0710);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+  .vstat{display:flex;gap:10px;flex-wrap:wrap}
+  .vchip{background:rgba(10,12,20,.9);border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-weight:900;font-size:13px;font-family:var(--disp)}
+  .vchip small{display:block;color:var(--muted);font-weight:700;font-size:10px;letter-spacing:.05em;text-transform:uppercase;margin-top:2px;font-family:"Segoe UI",sans-serif}
+  .vrank{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--val),#ff7a54);color:#fff;font-weight:900;border-radius:9px;padding:9px 13px;font-size:13px;font-family:var(--disp)}
+  .vrow{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;font-size:12.5px}
+  .vrow.me{background:rgba(255,70,85,.14);border:1px solid rgba(255,70,85,.4);font-weight:800}
+  .vrow.them{background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--muted)}
+  .valnote{margin:44px auto 0;font-size:12.5px;color:var(--muted);text-align:center;max-width:800px;line-height:1.7}
+  /* Pricing */
+  .prices{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:stretch}
+  .price{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;position:relative;transition:transform .2s ease}
+  .price:hover{transform:translateY(-4px)}
+  .price.best{border-color:rgba(152,76,255,.55);box-shadow:0 0 0 1px rgba(152,76,255,.25),0 26px 60px rgba(152,76,255,.16)}
+  .price .rib{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--brandA),var(--brandB));color:#fff;font-size:10.5px;font-weight:900;padding:3px 12px;border-radius:999px;letter-spacing:.06em;white-space:nowrap}
+  .price .tag{font-size:13px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+  .price .amt{font-family:var(--disp);font-size:34px;font-weight:700;margin:8px 0 2px}.price .amt small{font-size:14px;color:var(--muted);font-weight:600;font-family:"Segoe UI",sans-serif}
+  .price .note{font-size:13px;color:var(--muted);margin:2px 0 16px;min-height:20px}
+  .price ul{list-style:none;padding:0;margin:0 0 18px;font-size:13.5px;color:var(--muted)}
+  .price li{padding:6px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:flex-start}
+  .price li svg{width:15px;height:15px;flex:0 0 auto;margin-top:3px;color:#3bd16f}
+  .price .btn{margin-top:auto;text-align:center;justify-content:center}
+  .trial{font-size:11.5px;color:#3bd16f;font-weight:800;margin-bottom:12px}
+  .faq{max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+  .qa{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .qa h4{margin:0 0 6px;font-size:15px}.qa p{margin:0;color:var(--muted);font-size:14px}
+  .dlband{background:linear-gradient(135deg,rgba(255,48,72,.12),rgba(152,76,255,.14));border:1px solid var(--line);border-radius:20px;padding:48px 28px;text-align:center}
+  footer{border-top:1px solid var(--line);padding:36px 0 46px;color:var(--muted);font-size:14px;margin-top:24px}
+  .foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+  .foot .links{display:flex;gap:18px;flex-wrap:wrap}.foot a:hover{color:#fff}
+  .mor{font-size:12.5px;color:var(--muted);margin-top:16px;max-width:860px;line-height:1.7}
+  .legalgrid{margin-top:26px;padding-top:22px;border-top:1px solid var(--line);display:grid;grid-template-columns:1.5fr 1fr;gap:26px}
+  .legal-links{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+  .legal-links a{color:#b79bff}.legal-links a:hover{color:#fff}
+  .cm2c{display:flex;gap:14px;align-items:flex-start}
+  .cm2c img{width:110px;height:110px;border-radius:10px;background:#fff;object-fit:contain;flex:0 0 auto}
+  @media(max-width:900px){
+    .cine{height:auto}.cine-stage{height:auto;padding:60px 0 20px}.cine-inner{grid-template-columns:1fr;gap:30px}.cine-hint{display:none}
+    .hpin{height:auto}.hpin-sticky{position:static;height:auto}.hpin-track{flex-direction:column;transform:none!important;padding:0 24px}
+    .hpanel{flex:none;width:100%;height:auto;min-height:auto}
+    .val3d-wrap{height:auto}.val3d-stage{height:auto;padding:80px 0 10px}
+    .valreveal{height:auto}.valreveal-sticky{position:static;height:auto;padding:20px 0}
+    .valstage-wrap{height:auto}.valstage{position:static;height:auto;overflow:visible;display:block;padding:30px 0}
+    .vlayer{position:static;inset:auto;opacity:1!important;transform:none!important;margin:50px 0}
+    .grid{grid-template-columns:1fr 1fr}.prices{grid-template-columns:1fr 1fr}.shots{grid-template-columns:1fr}.valgrid{grid-template-columns:1fr}.nav .links{display:none}
+  }
+  @media(max-width:560px){.grid{grid-template-columns:1fr}.prices{grid-template-columns:1fr}.legalgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="amb"></div>
+<div class="scrollbar" id="scrollbar"></div>
+<header>
+  <div class="wrap nav">
+    <div class="logo">
+      <img class="logo-img" src="logo.png" alt="L'Overtime logo" onerror="this.removeAttribute('src')" />
+      <span class="logo-txt"><span class="logo-name" translate="no">L<span class="brand">'</span>Overtime</span><span class="logo-sub" translate="no">Manager</span></span>
+    </div>
+    <div class="nav-right">
+      <nav class="links">
+        <a href="#spaces" data-i18n="nav_spaces">Espaces</a>
+        <a href="#features" data-i18n="nav_features">Fonctionnalités</a>
+        <a href="#valorant" data-i18n="nav_valorant">Valorant</a>
+        <a href="#pricing" data-i18n="nav_pricing">Tarifs</a>
+        <a href="#download" data-i18n="nav_download">Télécharger</a>
+      </nav>
+      <button class="lang" id="langBtn" aria-label="Change language">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+        <span id="langLabel">FR</span>
+      </button>
+    </div>
+  </div>
+</header>
+<main>
+  <!-- HERO -->
+  <section class="cine" id="cine">
+    <div class="cine-stage" id="cineStage">
+      <div class="cine-inner">
+        <div class="cine-copy" id="cineCopy">
+          <div class="cine-pill"><span class="d"></span><span data-i18n="hero_pill">Rocket League aujourd'hui, Valorant bientôt</span></div>
+          <h1 data-i18n-html="hero_h1">Tout ce qu'il te faut sur <span class="brand">Rocket League</span>, dans une seule appli</h1>
+          <p class="lead" data-i18n="hero_lead">Diffusion, coaching et suivi de progression dans un seul outil. Scoreboard en direct, tournois, constructeur d'overlay et courbes de progression, pour les joueurs comme pour les streamers.</p>
+          <div class="cta">
+            <a class="btn btn-primary" href="#download" data-i18n="hero_cta1">Télécharger (gratuit)</a>
+            <a class="btn btn-ghost" href="#pricing" data-i18n="hero_cta2">Voir les tarifs</a>
+          </div>
+          <div class="microcopy" data-i18n="hero_micro">Windows · Gratuit pour démarrer · PRO sans engagement</div>
+        </div>
+        <div class="scene">
+          <div class="ovwrap" id="appwin">
+            <div class="ovscene-tag" data-i18n="hero_overlay_tag">Overlay joueur par défaut</div>
+            <div class="ovbadge">
+              <svg class="ovshield" viewBox="0 0 560 150" preserveAspectRatio="none" aria-hidden="true">
+                <defs><linearGradient id="ovg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fc314e"/><stop offset="1" stop-color="#9c4af7"/></linearGradient></defs>
+                <path d="M4,46 C150,8 410,8 556,46 L556,150 L4,150 Z" fill="url(#ovg)" opacity="0.92"/>
+              </svg>
+              <div class="ovface">
+                <div class="rankemblem">
+                  <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="re" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset="1" stop-color="#ff8a1e"/></linearGradient></defs><path d="M24 2l6 8 10 2-3 10 3 10-10 2-6 8-6-8-10-2 3-10-3-10 10-2z" fill="url(#re)" stroke="#fff5e0" stroke-width="1.2" opacity=".95"/><path d="M17 24l5 5 9-10" fill="none" stroke="#3a1d00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="rankwrap"><span class="rn" translate="no">GC II</span><span class="rl" data-i18n="ov_rank_label">Rang</span></div>
+                <div class="ovsep"></div>
+                <div class="ovstats">
+                  <div class="ovstat"><b translate="no">7-2</b><small data-i18n="ov_record">Session</small></div>
+                  <div class="ovstat"><b class="g" translate="no">+126</b><small data-i18n="ov_mmr">MMR</small></div>
+                  <div class="ovstat"><b class="fire" translate="no">🔥 5</b><small data-i18n="ov_streak">Série</small></div>
+                </div>
+              </div>
+            </div>
+            <div class="ovmeta" data-i18n="ov_meta">Pour les joueurs comme pour les streamers</div>
+          </div>
+        </div>
+      </div>
+      <div class="cine-hint"><span class="mouse"></span><span data-i18n="scroll_hint">Défile</span></div>
+    </div>
+  </section>
+
+  <!-- ESPACES (horizontal slide) -->
+  <section id="spaces" style="padding-bottom:0">
+    <div class="wrap hspaces-head">
+      <span class="kicker" data-i18n="spaces_kicker">Trois espaces, une appli</span>
+      <h2 data-rise data-i18n="spaces_title">Un outil pour toute la scène</h2>
+      <p class="sub" data-rise data-i18n="spaces_sub">Fais défiler pour parcourir les trois espaces. Que tu castes, que tu joues ou que tu coaches, l'appli s'adapte à ton rôle.</p>
+    </div>
+    <div class="hpin" id="hpin">
+      <div class="hpin-sticky">
+        <div class="hpin-track" id="hpinTrack">
+          <article class="hpanel">
+            <div class="head">
+              <div class="num">01</div>
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+              <h3 data-i18n="space_caster_t">Caster</h3>
+              <p data-i18n="space_caster_d">Produis une diffusion pro : scoreboard live, tournois, transitions, scènes et overlay sur mesure, le tout piloté depuis l'appli.</p>
+            </div>
+            <div class="hvisual">
+              <div style="position:relative">
+                <div class="mclock" translate="no">3:47 · GAME 3</div>
+                <div class="msb">
+                  <div class="t"><span class="lg b"></span><span translate="no">ALPHA</span></div>
+                  <div class="sc"><span class="n">2</span><span class="s">:</span><span class="n">1</span></div>
+                  <div class="t r"><span class="lg o"></span><span translate="no">OMEGA</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="tags"><span class="tag" data-i18n="tag_scoreboard">Scoreboard</span><span class="tag" data-i18n="tag_tournaments">Tournois</span><span class="tag" data-i18n="tag_transitions">Transitions</span></div>
+            <div class="hprog"><i></i></div>
+          </article>
+          <article class="hpanel">
+            <div class="head">
+              <div class="num">02</div>
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12h4M8 10v4"/><circle cx="15" cy="11" r="1"/><circle cx="18" cy="13" r="1"/><rect x="2" y="6" width="20" height="12" rx="4"/></svg></div>
+              <h3 data-i18n="space_player_t">Joueur</h3>
+              <p data-i18n="space_player_d">Suis tes sessions, ton MMR et ta série en direct, affiche ton overlay, et regarde ta progression match après match.</p>
+            </div>
+            <div class="hvisual">
+              <div class="ovbadge" style="width:100%;max-width:430px">
+                <svg class="ovshield" viewBox="0 0 560 150" preserveAspectRatio="none" aria-hidden="true"><path d="M4,46 C150,8 410,8 556,46 L556,150 L4,150 Z" fill="url(#ovg)" opacity="0.92"/></svg>
+                <div class="ovface" style="padding:12px 16px;gap:12px">
+                  <div class="rankemblem" style="width:44px;height:44px"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 2l6 8 10 2-3 10 3 10-10 2-6 8-6-8-10-2 3-10-3-10 10-2z" fill="url(#re)" stroke="#fff5e0" stroke-width="1.2" opacity=".95"/><path d="M17 24l5 5 9-10" fill="none" stroke="#3a1d00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <div class="rankwrap"><span class="rn" translate="no">GC II</span><span class="rl" data-i18n="ov_rank_label">Rang</span></div>
+                  <div class="ovsep"></div>
+                  <div class="ovstats" style="gap:12px">
+                    <div class="ovstat"><b translate="no">7-2</b><small data-i18n="ov_record">Session</small></div>
+                    <div class="ovstat"><b class="g" translate="no">+126</b><small data-i18n="ov_mmr">MMR</small></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tags"><span class="tag" data-i18n="tag_overlay">Overlay joueur</span><span class="tag" data-i18n="tag_mmr">MMR</span><span class="tag" data-i18n="tag_progress">Progression</span></div>
+            <div class="hprog"><i></i></div>
+          </article>
+          <article class="hpanel">
+            <div class="head">
+              <div class="num">03</div>
+              <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v13H4z"/><path d="M8 21h8M9 9l2 2 4-4"/></svg></div>
+              <h3 data-i18n="space_coach_t">Coach</h3>
+              <p data-i18n="space_coach_d">Gère ton roster, prépare tes tactiques, fixe des objectifs chiffrés à tes joueurs et suis leur progression sur des courbes claires.</p>
+            </div>
+            <div class="hvisual" style="flex-direction:column;gap:12px;align-items:stretch">
+              <svg viewBox="0 0 460 120" style="width:100%;height:auto;display:block;position:relative;z-index:1">
+                <defs>
+                  <linearGradient id="ln2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ff3048"/><stop offset="100%" stop-color="#984cff"/></linearGradient>
+                  <linearGradient id="fl2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(152,76,255,.30)"/><stop offset="100%" stop-color="rgba(152,76,255,.02)"/></linearGradient>
+                </defs>
+                <polygon fill="url(#fl2)" points="8,100 8,80 46,84 92,74 138,78 184,60 230,66 276,48 322,52 368,34 414,40 452,20 452,100"/>
+                <polyline fill="none" stroke="url(#ln2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="8,80 46,84 92,74 138,78 184,60 230,66 276,48 322,52 368,34 414,40 452,20"/>
+                <circle cx="452" cy="20" r="4.5" fill="#fff" stroke="#984cff" stroke-width="2"/>
+              </svg>
+              <div class="mrow"><span translate="no">Nova</span><b style="color:#3bd16f" translate="no">+180 MMR</b></div>
+              <div class="mrow"><span translate="no">Vortex</span><b style="color:#3bd16f" translate="no">+95 MMR</b></div>
+            </div>
+            <div class="tags"><span class="tag" data-i18n="tag_roster">Roster</span><span class="tag" data-i18n="tag_goals">Objectifs</span><span class="tag" data-i18n="tag_charts">Courbes</span></div>
+            <div class="hprog"><i></i></div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- OVERVIEW -->
+  <section id="overview" class="wrap">
+    <span class="kicker" data-i18n="ov_kicker">Aperçu</span>
+    <h2 data-rise data-i18n="ov_title">À quoi ça ressemble</h2>
+    <p class="sub" data-rise data-i18n="ov_sub">Un aperçu de ce que tu diffuses et de ce que tu analyses.</p>
+    <div class="shots" data-stagger>
+      <div class="shot">
+        <div class="art">
+          <div class="chart-head"><span class="val" translate="no">MMR 2v2 · 2000</span><span class="up" translate="no">+512</span></div>
+          <svg viewBox="0 0 460 150" style="width:100%;height:auto;display:block">
+            <defs>
+              <linearGradient id="ln" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ff3048"/><stop offset="100%" stop-color="#984cff"/></linearGradient>
+              <linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(152,76,255,.30)"/><stop offset="100%" stop-color="rgba(152,76,255,.02)"/></linearGradient>
+            </defs>
+            <polygon fill="url(#fl)" points="8,120 8,96 40,99 70,92 100,101 130,88 160,90 190,72 220,78 250,58 280,63 310,44 340,50 370,30 400,36 440,16 440,120"/>
+            <polyline fill="none" stroke="url(#ln)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="8,96 40,99 70,92 100,101 130,88 160,90 190,72 220,78 250,58 280,63 310,44 340,50 370,30 400,36 440,16"/>
+            <circle cx="440" cy="16" r="4.5" fill="#fff" stroke="#984cff" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="cap"><h3 data-i18n="ov_s1_t">Progression &amp; coaching</h3><p data-i18n="ov_s1_d">Courbes de MMR et de stats, moyennes par joueur, objectifs de coach. L'évolution se lit d'un coup d'œil.</p></div>
+      </div>
+      <div class="shot">
+        <div class="art">
+          <svg class="bracket" viewBox="0 0 460 150" style="width:100%;height:auto;display:block">
+            <rect class="bkt-box" x="6" y="10" width="120" height="24" rx="5"/><text x="16" y="26" translate="no">Alpha</text>
+            <rect class="bkt-box bkt-win" x="6" y="44" width="120" height="24" rx="5"/><text x="16" y="60" translate="no">Omega</text>
+            <rect class="bkt-box" x="6" y="86" width="120" height="24" rx="5"/><text x="16" y="102" translate="no">Nova</text>
+            <rect class="bkt-box bkt-win" x="6" y="120" width="120" height="24" rx="5"/><text x="16" y="136" translate="no">Vortex</text>
+            <line x1="126" y1="56" x2="150" y2="56"/><line x1="126" y1="132" x2="150" y2="132"/>
+            <line x1="150" y1="56" x2="150" y2="132"/><line x1="150" y1="94" x2="174" y2="94"/>
+            <rect class="bkt-box bkt-win" x="174" y="46" width="120" height="24" rx="5"/><text x="184" y="62" translate="no">Omega</text>
+            <rect class="bkt-box" x="174" y="106" width="120" height="24" rx="5"/><text x="184" y="122" translate="no">Vortex</text>
+            <line x1="294" y1="58" x2="318" y2="58"/><line x1="294" y1="118" x2="318" y2="118"/>
+            <line x1="318" y1="58" x2="318" y2="118"/><line x1="318" y1="88" x2="342" y2="88"/>
+            <rect class="bkt-box bkt-win" x="342" y="76" width="112" height="26" rx="6"/><text x="352" y="93" translate="no" style="fill:#fff">Omega</text>
+          </svg>
+        </div>
+        <div class="cap"><h3 data-i18n="ov_s2_t">Brackets de tournoi <span class="pro" translate="no">PRO</span></h3><p data-i18n="ov_s2_d">Élimination directe ou rondes suisses, Best-of par tour, et un match poussé à l'antenne en un clic.</p></div>
+      </div>
+      <div class="shot">
+        <div class="art">
+          <div class="builder">
+            <div class="blk solid" style="left:14px;top:16px;width:150px;height:34px" translate="no">ALPHA 2 : 1 OMEGA</div>
+            <div class="blk" style="left:180px;top:16px;width:90px;height:34px" data-i18n="blk_timer">Chrono</div>
+            <div class="blk" style="left:14px;top:64px;width:120px;height:60px" data-i18n="blk_logo">Logo équipe</div>
+            <div class="blk" style="left:150px;top:64px;width:150px;height:60px" data-i18n="blk_stats">Stats de fin</div>
+            <div class="blk" style="left:14px;top:134px;width:286px;height:38px" data-i18n="blk_lower">Bandeau / titre</div>
+          </div>
+        </div>
+        <div class="cap"><h3 data-i18n="ov_s3_t">Constructeur d'overlay <span class="pro" translate="no">PRO</span></h3><p data-i18n="ov_s3_d">Compose ton overlay bloc par bloc, place tout à la souris, sauvegarde tes designs et réutilise-les.</p></div>
+      </div>
+      <div class="shot">
+        <div class="art">
+          <div class="builder" style="height:auto;padding:18px 16px">
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-family:var(--disp)">
+              <div style="background:rgba(10,12,20,.92);border:1px solid var(--line);border-radius:9px;padding:10px 14px;font-weight:700" translate="no">7 - 2</div>
+              <div style="background:rgba(10,12,20,.92);border:1px solid var(--line);border-radius:9px;padding:10px 14px"><span style="color:#3bd16f;font-weight:700" translate="no">+126</span> <span style="color:var(--muted);font-size:12px" data-i18n="ov_mmr">MMR</span></div>
+              <div style="background:rgba(10,12,20,.92);border:1px solid var(--line);border-radius:9px;padding:10px 14px;font-weight:700;display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" width="15" height="15" fill="#ff8a1e"><path d="M12 2c1 3-1 4-1 6a3 3 0 0 0 5 2c1 2 2 3 2 6a6 6 0 0 1-12 0c0-4 3-5 3-8 0-2 2-3 3-6z"/></svg><span translate="no">5</span></div>
+              <div style="background:linear-gradient(135deg,var(--brandA),var(--brandB));border-radius:9px;padding:10px 14px;font-weight:700;color:#fff" translate="no">GC II</div>
+            </div>
+          </div>
+        </div>
+        <div class="cap"><h3 data-i18n="ov_s4_t">Overlay joueur pour ton stream <span class="free-badge" data-i18n="free_tag">GRATUIT</span></h3><p data-i18n="ov_s4_d">V/D de la session, MMR gagné, série en cours et rang. Un overlay par défaut prêt à l'emploi, sans rien configurer.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FEATURES -->
+  <section id="features" class="wrap">
+    <span class="kicker" data-i18n="feat_kicker">Fonctionnalités</span>
+    <h2 data-rise data-i18n="feat_title">Tout ce qu'il te faut à l'antenne</h2>
+    <p class="sub" data-rise data-i18n="feat_sub">Une seule appli pour piloter toute ta diffusion Rocket League.</p>
+    <div class="grid" data-stagger>
+      <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M8 5v14"/></svg></div><h3 data-i18n="f1_t">Scoreboard en temps réel</h3><p data-i18n="f1_d">Scorebug synchronisé au jeu : scores, chrono, noms et logos d'équipe, score de série.</p></div>
+      <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></div><h3 data-i18n="f2_t">Tournois <span class="pro" translate="no">PRO</span></h3><p data-i18n="f2_d">Brackets à élimination directe et rondes suisses, Best-of et horaires par tour, match poussé en un clic.</p></div>
+      <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 9l5 3-5 3z"/></svg></div><h3 data-i18n="f3_t">Transitions &amp; scènes</h3><p data-i18n="f3_d">Ajoute des transitions entre tes scènes et déclenche-les sur les buts, directement depuis l'appli.</p></div>
+      <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><h3 data-i18n="f4_t">Stats de fin de match</h3><p data-i18n="f4_d">Un tableau complet des stats de la partie, avec le MVP mis en avant.</p></div>
+      <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></div><h3 data-i18n="f5_t">Saisie de score à distance <span class="pro" translate="no">PRO</span></h3><p data-i18n="f5_d">Un admin met à jour le score depuis n'importe quel téléphone ou PC, protégé par un code privé.</p></div>
+      <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></div><h3 data-i18n="f6_t">Constructeur d'overlay <span class="pro" translate="no">PRO</span></h3><p data-i18n="f6_d">Compose ton overlay à partir de blocs, sauvegarde tes designs et partage-les.</p></div>
+      <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H13l-4 3v-3H4z"/></svg></div><h3 data-i18n="f7_t">Interaction <span translate="no">Twitch</span> <span class="pro" translate="no">PRO</span></h3><p data-i18n="f7_d">Un mini-jeu de tir à la corde où ton chat vote pour faire pencher le show.</p></div>
+      <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></div><h3 data-i18n="f8_t">Progression &amp; objectifs <span class="pro" translate="no">PRO</span></h3><p data-i18n="f8_d">Courbes de MMR et de stats, objectifs de coach chiffrés, et comparaison entre joueurs.</p></div>
+      <div class="feature"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></div><h3 data-i18n="f9_t">Overlay joueur <span class="free-badge" data-i18n="free_tag2">GRATUIT</span></h3><p data-i18n="f9_d">Un overlay de session prêt à l'emploi pour ton stream, sans configuration.</p></div>
+    </div>
+  </section>
+
+  <!-- VALORANT -->
+  <section class="valsec" id="valorant" style="padding-top:0">
+    <div class="valstage-wrap" id="valstageWrap">
+      <div class="valstage" id="valstage">
+        <div class="valburst" id="valburst"></div>
+        <div class="valflash" id="valflash"></div>
+
+        <div class="vlayer" id="vlayerWord">
+          <div class="val3dscale" id="val3dScale">
+            <div class="val3d" id="val3d" aria-label="Valorant">
+              <span>V</span><span>A</span><span>L</span><span>O</span><span>R</span><span>A</span><span>N</span><span>T</span>
+            </div>
+          </div>
+          <div class="soon-badge" id="valBadge" data-i18n="val_badge">EN PRÉPARATION</div>
+        </div>
+
+        <div class="vlayer" id="vlayerCards">
+          <div class="wrap">
+            <span class="kicker val" data-i18n="val_kicker">Nouveau jeu</span>
+            <h2 id="valTitle" data-i18n="val_head">Le même ADN, sur Valorant</h2>
+            <p class="sub" id="valSub" data-i18n="val_sub">Tes stats et ta progression à partir de ton propre compte, connecté via Riot. Des données à toi, jamais du scouting adverse en direct.</p>
+            <div class="valgrid" id="valgrid">
+        <div class="valcard">
+          <div class="valmock">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <span class="vrank" translate="no">Immortal 2</span>
+              <span style="font-size:12px;font-weight:800;color:#3bd16f;background:rgba(59,209,111,.12);padding:2px 8px;border-radius:999px" translate="no">+84 RR</span>
+            </div>
+            <div class="vstat">
+              <div class="vchip" translate="no">254<small data-i18n="val_acs">ACS moyen</small></div>
+              <div class="vchip" translate="no">1.3<small data-i18n="val_kd">K/D</small></div>
+              <div class="vchip" translate="no">24%<small data-i18n="val_hs">Headshot</small></div>
+              <div class="vchip" translate="no">57%<small data-i18n="val_wr">Winrate</small></div>
+            </div>
+          </div>
+          <h3 data-i18n="val_c1_t">Ton tableau de progression</h3>
+          <p data-i18n="val_c1_d">Courbes de rang, ACS, précision et winrate acte après acte. Ton évolution se lit d'un coup d'œil, comme sur Rocket League.</p>
+        </div>
+        <div class="valcard">
+          <div class="valmock">
+            <div style="font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px" data-i18n="val_recap_label">Récap de ta partie</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="vrow me"><span translate="no" data-i18n="val_you">Toi</span><span translate="no">28 / 14 / 6 · 268 ACS</span></div>
+              <div class="vrow them"><span translate="no" data-i18n="val_teammate">Coéquipier</span><span translate="no">19 / 16 / 9 · 201 ACS</span></div>
+              <div class="vrow them"><span translate="no" data-i18n="val_teammate">Coéquipier</span><span translate="no">12 / 17 / 11 · 154 ACS</span></div>
+            </div>
+          </div>
+          <h3 data-i18n="val_c2_t">Récap post-match</h3>
+          <p data-i18n="val_c2_d">Une fois la partie finie, tu revois ta performance et celle de ton équipe. Les lignes qui piquent et celles qui progressent, sans jugement sur personne.</p>
+        </div>
+        <div class="valcard">
+          <div class="valmock">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+              <div class="vchip" translate="no">28 - 14<small data-i18n="val_kda">K / D</small></div>
+              <div class="vchip" translate="no">268<small data-i18n="val_acs2">ACS</small></div>
+              <div class="vrank" style="padding:9px 12px" translate="no">Jett</div>
+            </div>
+          </div>
+          <h3 data-i18n="val_c3_t">Overlay perso pour ton stream</h3>
+          <p data-i18n="val_c3_d">Compose ton propre overlay Valorant bloc par bloc, comme sur Rocket League, et affiche-le sur ta partie ou ton stream. Tes stats à toi, à ta façon.</p>
+        </div>
+        <div class="valcard">
+          <div class="valmock" style="display:flex;align-items:center;gap:12px">
+            <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="var(--val)" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg>
+            <div style="font-size:12.5px;color:var(--muted);line-height:1.5" data-i18n="val_c4_mock">Connexion sécurisée par Riot Sign On. Tu autorises, tu gardes la main, tu peux te déconnecter quand tu veux.</div>
+          </div>
+          <h3 data-i18n="val_c4_t">Tes données, ton contrôle</h3>
+          <p data-i18n="val_c4_d">Tout part de ton compte via Riot Sign On. On n'utilise que les données que tu choisis de connecter. Pas de rang ni de peak adverse en direct.</p>
+        </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="vlayer" id="vlayerSoon">
+          <div class="val3dscale" id="soonScale">
+            <div class="val3d" id="soon3d" aria-label="Bientôt"><span>B</span><span>I</span><span>E</span><span>N</span><span>T</span><span>Ô</span><span>T</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="wrap" style="padding-bottom:70px"><p class="valnote" data-rise data-i18n="val_note">Version Valorant en préparation. Les visuels ci-dessus sont des maquettes. Valorant et Riot Games sont des marques de Riot Games, Inc. L'Overtime est un produit indépendant, sans affiliation ni approbation de Riot Games.</p></div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="wrap">
+    <span class="kicker" data-i18n="price_kicker">Tarifs</span>
+    <h2 data-rise data-i18n="price_title">Des tarifs simples</h2>
+    <p class="sub" data-rise data-i18n="price_sub">Commence gratuitement. Passe en PRO pour débloquer les fonctions premium. Sans engagement.</p>
+    <div class="prices" data-stagger>
+      <div class="price">
+        <div class="tag" data-i18n="p_free_tag">Gratuit</div>
+        <div class="amt">0 €</div>
+        <div class="note" data-i18n="p_free_note">Aucune licence requise</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_free_l1">Overlay &amp; scoreboard de diffusion</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_free_l2">Overlay joueur : V/D, MMR, série</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_free_l3">Scènes, transitions &amp; fin de match</span></li>
+        </ul>
+        <a class="btn btn-ghost" href="#download" data-i18n="p_free_btn">Télécharger</a>
+      </div>
+      <div class="price best">
+        <div class="rib" data-i18n="p_rib">Le plus flexible</div>
+        <div class="tag" data-i18n="p_m_tag">PRO Mensuel</div>
+        <div class="amt">2,99 € <small data-i18n="per_month">/ mois</small></div>
+        <div class="note" data-i18n="p_m_note">Facturé chaque mois</div>
+        <div class="trial" data-i18n="p_trial">Essai gratuit de 7 jours</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_m_l1">Tout le Gratuit</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_m_l2">Tournois, brackets &amp; score à distance</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_m_l3">Constructeur d'overlay &amp; interaction Twitch</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_m_l4">Progression, objectifs &amp; coaching</span></li>
+        </ul>
+        <a class="btn btn-primary" href="https://lovertime.lemonsqueezy.com/checkout/buy/b04250f5-67e5-48d9-9325-206f2ca5080e" data-i18n="p_getpro">Passer en PRO</a>
+      </div>
+      <div class="price">
+        <div class="tag" data-i18n="p_6_tag">PRO 6 mois</div>
+        <div class="amt">13,99 € <small data-i18n="per_6mo">/ 6 mois</small></div>
+        <div class="note" data-i18n="p_6_note">≈ 2,33 € / mois</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_6_l1">Tout le PRO</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_6_l2">Économie vs mensuel</span></li>
+        </ul>
+        <a class="btn btn-primary" href="https://lovertime.lemonsqueezy.com/checkout/buy/b04250f5-67e5-48d9-9325-206f2ca5080e" data-i18n="p_getpro2">Passer en PRO</a>
+      </div>
+      <div class="price">
+        <div class="tag" data-i18n="p_y_tag">PRO Annuel</div>
+        <div class="amt">25,99 € <small data-i18n="per_year">/ an</small></div>
+        <div class="note" data-i18n="p_y_note">≈ 2,17 € / mois · meilleur prix</div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_y_l1">Tout le PRO</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg><span data-i18n="p_y_l2">Le meilleur tarif</span></li>
+        </ul>
+        <a class="btn btn-primary" href="https://lovertime.lemonsqueezy.com/checkout/buy/b04250f5-67e5-48d9-9325-206f2ca5080e" data-i18n="p_getpro3">Passer en PRO</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FAQ -->
+  <section id="faq" class="wrap">
+    <span class="kicker" data-i18n="faq_kicker">FAQ</span>
+    <h2 data-rise data-i18n="faq_title">Questions fréquentes</h2>
+    <div class="faq" data-stagger style="margin-top:20px">
+      <div class="qa"><h4 data-i18n="q1">Comment ça marche ?</h4><p data-i18n="a1">Tu lances l'appli, tu actives ton overlay, et c'est parti. Que tu sois simple joueur ou streamer, il s'affiche sur ta partie. Rien à installer d'autre, rien à coder.</p></div>
+      <div class="qa"><h4 data-i18n="q2">C'est fait pour qui ?</h4><p data-i18n="a2">Pour les casters, les joueurs et les coachs. Chacun a son espace dédié dans l'appli, avec ses outils.</p></div>
+      <div class="qa"><h4 data-i18n="q3">Faut-il créer un compte ?</h4><p data-i18n="a3">Non pour démarrer : le gratuit s'utilise tout de suite. Le PRO se débloque simplement en collant ta clé de licence.</p></div>
+      <div class="qa"><h4 data-i18n="q4">Comment activer le PRO ?</h4><p data-i18n="a4">Après l'achat, tu reçois une clé de licence à coller dans l'appli. Les abonnements sont gérés par Lemon Squeezy.</p></div>
+      <div class="qa"><h4 data-i18n="q5">Puis-je annuler quand je veux ?</h4><p data-i18n="a5">Oui. L'abonnement est sans engagement et s'annule à tout moment depuis ton espace Lemon Squeezy.</p></div>
+      <div class="qa"><h4 data-i18n="q6">Et Valorant, c'est pour quand ?</h4><p data-i18n="a6">La version Valorant est en préparation. Elle partira de ton propre compte via Riot Sign On pour suivre ta progression et tes stats, sans jamais afficher le rang ni le peak des adversaires en direct.</p></div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section id="download" class="wrap">
+    <div class="dlband" data-rise>
+      <h2 data-i18n="dl_title">Télécharge L'Overtime Manager</h2>
+      <p class="sub" style="margin-bottom:22px" data-i18n="dl_sub">Récupère la dernière version Windows. Le PRO se débloque en collant ta clé de licence dans l'appli après l'achat.</p>
+      <div class="cta" style="justify-content:center">
+        <a class="btn btn-primary" href="https://github.com/LovertimeOff/Lovertime-Releases/releases/latest/download/Lovertime-Manager-Setup.exe" data-i18n="dl_cta1">Télécharger (Windows)</a>
+        <a class="btn btn-ghost" href="https://discord.gg/DvPbPJhSuy" data-i18n="dl_cta2">Rejoindre le Discord</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div class="logo">
+        <img class="logo-img" src="logo.png" alt="L'Overtime logo" onerror="this.removeAttribute('src')" />
+        <span class="logo-txt"><span class="logo-name" translate="no">L<span class="brand">'</span>Overtime</span><span class="logo-sub" translate="no">Manager</span></span>
+      </div>
+      <div class="links">
+        <a href="https://discord.gg/DvPbPJhSuy" translate="no">Discord</a>
+        <a href="https://github.com/LovertimeOff/Lovertime-Releases" translate="no">GitHub</a>
+        <a href="#pricing" data-i18n="nav_pricing">Tarifs</a>
+      </div>
+    </div>
+    <div class="legalgrid">
+      <div>
+        <div style="font-weight:800;color:#eef0f6;margin-bottom:8px" data-i18n="foot_legal">Mentions légales</div>
+        <div class="legal-links">
+          <a href="mentions-legales.html">Mentions légales</a>
+          <a href="cgv.html">CGV</a>
+          <a href="cgu.html">CGU / Licence</a>
+          <a href="confidentialite.html">Confidentialité</a>
+        </div>
+        <p style="font-size:12.5px;color:var(--muted);margin:0;line-height:1.65">
+          Éditeur : Harold Anguy · Entrepreneur individuel · APE 93.29Z · TVA non applicable (art. 293 B du CGI).<br/>
+          Contact : ministreducosmos@gmail.com · coordonnées complètes dans les <a href="mentions-legales.html" style="color:#b79bff">mentions légales</a>.<br/>
+          Hébergement : GitHub Pages (GitHub, Inc.). Paiements &amp; abonnements : Lemon Squeezy (Merchant of Record).
+        </p>
+      </div>
+      <div class="cm2c">
+        <img src="cm2c-mediateur.png" alt="Médiateur de la consommation CM2C" onerror="this.style.display='none'" />
+        <p style="font-size:12px;color:var(--muted);margin:0;line-height:1.6">
+          <b style="color:#eef0f6">Médiation de la consommation.</b> Après une réclamation écrite restée sans solution, vous pouvez saisir gratuitement le médiateur <b>CM2C</b> · 49 rue de Ponthieu, 75008 Paris · <a href="https://www.cm2c.net/declarer-un-litige.php" style="color:#b79bff">cm2c.net/declarer-un-litige</a> · litiges@cm2c.net.
+        </p>
+      </div>
+    </div>
+    <p class="mor">© 2026 <span translate="no">L'Overtime Manager</span> · Harold Anguy. <span data-i18n="foot_trademark">Rocket League est une marque de Psyonix LLC ; L'Overtime est un produit indépendant, sans affiliation ni approbation de Psyonix.</span> <span data-i18n="foot_trademark_riot">Valorant et Riot Games sont des marques de Riot Games, Inc. ; L'Overtime est un produit indépendant, sans affiliation ni approbation de Riot Games.</span> <span data-i18n="foot_trademark_pay">Les paiements et abonnements sont gérés par notre Merchant of Record, Lemon Squeezy.</span></p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+  const I18N = {
+    fr: {
+      nav_spaces:"Espaces", nav_features:"Fonctionnalités", nav_valorant:"Valorant", nav_pricing:"Tarifs", nav_download:"Télécharger",
+      hero_pill:"Rocket League aujourd'hui, Valorant bientôt",
+      hero_h1:"Tout ce qu'il te faut sur <span class='brand'>Rocket League</span>, dans une seule appli",
+      hero_lead:"Diffusion, coaching et suivi de progression dans un seul outil. Scoreboard en direct, tournois, constructeur d'overlay et courbes de progression, pour les joueurs comme pour les streamers.",
+      hero_cta1:"Télécharger (gratuit)", hero_cta2:"Voir les tarifs",
+      hero_micro:"Windows · Gratuit pour démarrer · PRO sans engagement",
+      hero_overlay_tag:"Overlay joueur par défaut", ov_rank_label:"Rang", ov_record:"Session", ov_streak:"Série", ov_meta:"Pour les joueurs comme pour les streamers",
+      scroll_hint:"Défile",
+      spaces_kicker:"Trois espaces, une appli", spaces_title:"Un outil pour toute la scène",
+      spaces_sub:"Fais défiler pour parcourir les trois espaces. Que tu castes, que tu joues ou que tu coaches, l'appli s'adapte à ton rôle.",
+      space_caster_t:"Caster", space_caster_d:"Produis une diffusion pro : scoreboard live, tournois, transitions, scènes et overlay sur mesure, le tout piloté depuis l'appli.",
+      space_player_t:"Joueur", space_player_d:"Suis tes sessions, ton MMR et ta série en direct, affiche ton overlay de stream, et regarde ta progression match après match.",
+      space_coach_t:"Coach", space_coach_d:"Gère ton roster, prépare tes tactiques, fixe des objectifs chiffrés à tes joueurs et suis leur progression sur des courbes claires.",
+      tag_scoreboard:"Scoreboard", tag_tournaments:"Tournois", tag_transitions:"Transitions",
+      tag_overlay:"Overlay joueur", tag_mmr:"MMR", tag_progress:"Progression",
+      tag_roster:"Roster", tag_goals:"Objectifs", tag_charts:"Courbes",
+      ov_kicker:"Aperçu", ov_title:"À quoi ça ressemble", ov_sub:"Un aperçu de ce que tu diffuses et de ce que tu analyses.",
+      ov_s1_t:"Progression & coaching", ov_s1_d:"Courbes de MMR et de stats, moyennes par joueur, objectifs de coach. L'évolution se lit d'un coup d'œil.",
+      ov_s2_t:"Brackets de tournoi", ov_s2_d:"Élimination directe ou rondes suisses, Best-of par tour, et un match poussé à l'antenne en un clic.",
+      ov_s3_t:"Constructeur d'overlay", ov_s3_d:"Compose ton overlay bloc par bloc, place tout à la souris, sauvegarde tes designs et réutilise-les.",
+      ov_s4_t:"Overlay joueur pour ton stream", ov_s4_d:"V/D de la session, MMR gagné, série en cours et rang. Un overlay par défaut prêt à l'emploi, sans rien configurer.",
+      ov_mmr:"MMR", blk_timer:"Chrono", blk_logo:"Logo équipe", blk_stats:"Stats de fin", blk_lower:"Bandeau / titre", free_tag:"GRATUIT", free_tag2:"GRATUIT",
+      feat_kicker:"Fonctionnalités", feat_title:"Tout ce qu'il te faut à l'antenne", feat_sub:"Une seule appli pour piloter toute ta diffusion Rocket League.",
+      f1_t:"Scoreboard en temps réel", f1_d:"Scorebug synchronisé au jeu : scores, chrono, noms et logos d'équipe, score de série.",
+      f2_t:"Tournois", f2_d:"Brackets à élimination directe et rondes suisses, Best-of et horaires par tour, match poussé en un clic.",
+      f3_t:"Transitions & scènes", f3_d:"Ajoute des transitions entre tes scènes et déclenche-les sur les buts, directement depuis l'appli.",
+      f4_t:"Stats de fin de match", f4_d:"Un tableau complet des stats de la partie, avec le MVP mis en avant.",
+      f5_t:"Saisie de score à distance", f5_d:"Un admin met à jour le score depuis n'importe quel téléphone ou PC, protégé par un code privé.",
+      f6_t:"Constructeur d'overlay", f6_d:"Compose ton overlay à partir de blocs, sauvegarde tes designs et partage-les.",
+      f7_t:"Interaction Twitch", f7_d:"Un mini-jeu de tir à la corde où ton chat vote pour faire pencher le show.",
+      f8_t:"Progression & objectifs", f8_d:"Courbes de MMR et de stats, objectifs de coach chiffrés, et comparaison entre joueurs.",
+      f9_t:"Overlay joueur", f9_d:"Un overlay de session prêt à l'emploi pour ton stream, sans configuration.",
+      val_kicker:"Nouveau jeu", val_badge:"EN PRÉPARATION", val_head:"Le même ADN, sur Valorant", soon_word:"BIENTÔT",
+      val_sub:"Tes stats et ta progression à partir de ton propre compte, connecté via Riot. Des données à toi, jamais du scouting adverse en direct.",
+      val_acs:"ACS moyen", val_kd:"K/D", val_hs:"Headshot", val_wr:"Winrate", val_kda:"K / D", val_acs2:"ACS",
+      val_recap_label:"Récap de ta partie", val_you:"Toi", val_teammate:"Coéquipier",
+      val_c1_t:"Ton tableau de progression", val_c1_d:"Courbes de rang, ACS, précision et winrate acte après acte. Ton évolution se lit d'un coup d'œil, comme sur Rocket League.",
+      val_c2_t:"Récap post-match", val_c2_d:"Une fois la partie finie, tu revois ta performance et celle de ton équipe. Les lignes qui piquent et celles qui progressent, sans jugement sur personne.",
+      val_c3_t:"Overlay perso pour ton stream", val_c3_d:"Compose ton propre overlay Valorant bloc par bloc, comme sur Rocket League, et affiche-le sur ta partie ou ton stream. Tes stats à toi, à ta façon.",
+      val_c4_t:"Tes données, ton contrôle", val_c4_d:"Tout part de ton compte via Riot Sign On. On n'utilise que les données que tu choisis de connecter. Pas de rang ni de peak adverse en direct.",
+      val_c4_mock:"Connexion sécurisée par Riot Sign On. Tu autorises, tu gardes la main, tu peux te déconnecter quand tu veux.",
+      val_note:"Version Valorant en préparation. Les visuels ci-dessus sont des maquettes. Valorant et Riot Games sont des marques de Riot Games, Inc. L'Overtime est un produit indépendant, sans affiliation ni approbation de Riot Games.",
+      price_kicker:"Tarifs", price_title:"Des tarifs simples", price_sub:"Commence gratuitement. Passe en PRO pour débloquer les fonctions premium. Sans engagement.",
+      p_free_tag:"Gratuit", p_free_note:"Aucune licence requise",
+      p_free_l1:"Overlay & scoreboard de diffusion", p_free_l2:"Overlay joueur : V/D, MMR, série", p_free_l3:"Scènes, transitions & fin de match", p_free_btn:"Télécharger",
+      p_rib:"Le plus flexible", p_m_tag:"PRO Mensuel", per_month:"/ mois", p_m_note:"Facturé chaque mois", p_trial:"Essai gratuit de 7 jours",
+      p_m_l1:"Tout le Gratuit", p_m_l2:"Tournois, brackets & score à distance", p_m_l3:"Constructeur d'overlay & interaction Twitch", p_m_l4:"Progression, objectifs & coaching", p_getpro:"Passer en PRO",
+      p_6_tag:"PRO 6 mois", per_6mo:"/ 6 mois", p_6_note:"≈ 2,33 € / mois", p_6_l1:"Tout le PRO", p_6_l2:"Économie vs mensuel", p_getpro2:"Passer en PRO",
+      p_y_tag:"PRO Annuel", per_year:"/ an", p_y_note:"≈ 2,17 € / mois · meilleur prix", p_y_l1:"Tout le PRO", p_y_l2:"Le meilleur tarif", p_getpro3:"Passer en PRO",
+      faq_kicker:"FAQ", faq_title:"Questions fréquentes",
+      q1:"Comment ça marche ?", a1:"Tu lances l'appli, tu actives ton overlay, et c'est parti. Que tu sois simple joueur ou streamer, il s'affiche sur ta partie. Rien à installer d'autre, rien à coder.",
+      q2:"C'est fait pour qui ?", a2:"Pour les casters, les joueurs et les coachs. Chacun a son espace dédié dans l'appli, avec ses outils.",
+      q3:"Faut-il créer un compte ?", a3:"Non pour démarrer : le gratuit s'utilise tout de suite. Le PRO se débloque simplement en collant ta clé de licence.",
+      q4:"Comment activer le PRO ?", a4:"Après l'achat, tu reçois une clé de licence à coller dans l'appli. Les abonnements sont gérés par Lemon Squeezy.",
+      q5:"Puis-je annuler quand je veux ?", a5:"Oui. L'abonnement est sans engagement et s'annule à tout moment depuis ton espace Lemon Squeezy.",
+      q6:"Et Valorant, c'est pour quand ?", a6:"La version Valorant est en préparation. Elle partira de ton propre compte via Riot Sign On pour suivre ta progression et tes stats, sans jamais afficher le rang ni le peak des adversaires en direct.",
+      dl_title:"Télécharge L'Overtime Manager", dl_sub:"Récupère la dernière version Windows. Le PRO se débloque en collant ta clé de licence dans l'appli après l'achat.",
+      dl_cta1:"Télécharger (Windows)", dl_cta2:"Rejoindre le Discord",
+      foot_legal:"Mentions légales",
+      foot_trademark:"Rocket League est une marque de Psyonix LLC ; L'Overtime est un produit indépendant, sans affiliation ni approbation de Psyonix.",
+      foot_trademark_riot:"Valorant et Riot Games sont des marques de Riot Games, Inc. ; L'Overtime est un produit indépendant, sans affiliation ni approbation de Riot Games.",
+      foot_trademark_pay:"Les paiements et abonnements sont gérés par notre Merchant of Record, Lemon Squeezy."
+    },
+    en: {
+      nav_spaces:"Spaces", nav_features:"Features", nav_valorant:"Valorant", nav_pricing:"Pricing", nav_download:"Download",
+      hero_pill:"Rocket League today, Valorant soon",
+      hero_h1:"Everything you need for <span class='brand'>Rocket League</span>, in one app",
+      hero_lead:"Broadcast, coaching and progress tracking in one tool. Live scoreboard, tournaments, an overlay builder and progress charts, built for players and streamers alike.",
+      hero_cta1:"Download (free)", hero_cta2:"See pricing",
+      hero_micro:"Windows · Free to start · PRO, cancel anytime",
+      hero_overlay_tag:"Default player overlay", ov_rank_label:"Rank", ov_record:"Session", ov_streak:"Streak", ov_meta:"For players and streamers alike",
+      scroll_hint:"Scroll",
+      spaces_kicker:"Three spaces, one app", spaces_title:"One tool for the whole scene",
+      spaces_sub:"Scroll to move through the three spaces. Whether you cast, play or coach, the app adapts to your role.",
+      space_caster_t:"Caster", space_caster_d:"Run a pro broadcast: live scoreboard, tournaments, transitions, scenes and a custom overlay, all controlled from the app.",
+      space_player_t:"Player", space_player_d:"Track your sessions, MMR and streak live, show your stream overlay, and watch your progress match after match.",
+      space_coach_t:"Coach", space_coach_d:"Manage your roster, prepare tactics, set numeric goals for your players and track their progress on clear charts.",
+      tag_scoreboard:"Scoreboard", tag_tournaments:"Tournaments", tag_transitions:"Transitions",
+      tag_overlay:"Player overlay", tag_mmr:"MMR", tag_progress:"Progress",
+      tag_roster:"Roster", tag_goals:"Goals", tag_charts:"Charts",
+      ov_kicker:"Overview", ov_title:"What it looks like", ov_sub:"A glimpse of what you broadcast and what you analyze.",
+      ov_s1_t:"Progress & coaching", ov_s1_d:"MMR and stat curves, per-player averages, coach goals. Your evolution reads at a glance.",
+      ov_s2_t:"Tournament brackets", ov_s2_d:"Single-elimination or Swiss rounds, per-round Best-of, and a match pushed on air in one click.",
+      ov_s3_t:"Overlay builder", ov_s3_d:"Build your overlay block by block, place everything with the mouse, save your designs and reuse them.",
+      ov_s4_t:"Player overlay for your stream", ov_s4_d:"Session W/L, MMR gained, current streak and rank. A default overlay ready to use, no setup.",
+      ov_mmr:"MMR", blk_timer:"Clock", blk_logo:"Team logo", blk_stats:"End stats", blk_lower:"Lower third / title", free_tag:"FREE", free_tag2:"FREE",
+      feat_kicker:"Features", feat_title:"Everything you need on air", feat_sub:"One app to control your whole Rocket League broadcast.",
+      f1_t:"Real-time scoreboard", f1_d:"Scorebug synced to the game: scores, clock, team names and logos, series score.",
+      f2_t:"Tournaments", f2_d:"Single-elimination brackets and Swiss rounds, per-round Best-of and schedules, match pushed in one click.",
+      f3_t:"Transitions & scenes", f3_d:"Add transitions between your scenes and trigger them on goals, straight from the app.",
+      f4_t:"End-of-match stats", f4_d:"A full stat table for the game, with the MVP highlighted.",
+      f5_t:"Remote score entry", f5_d:"An admin updates the score from any phone or PC, secured by a private code.",
+      f6_t:"Overlay builder", f6_d:"Build your overlay from blocks, save your designs and share them.",
+      f7_t:"Twitch interaction", f7_d:"A tug-of-war mini-game where your chat votes to tip the show.",
+      f8_t:"Progress & goals", f8_d:"MMR and stat curves, numeric coach goals, and player-to-player comparison.",
+      f9_t:"Player overlay", f9_d:"A ready-to-use session overlay for your stream, no setup needed.",
+      val_kicker:"New game", val_badge:"IN THE WORKS", val_head:"The same DNA, on Valorant", soon_word:"SOON",
+      val_sub:"Your stats and your progress from your own account, connected through Riot. Your data, never live opponent scouting.",
+      val_acs:"Avg ACS", val_kd:"K/D", val_hs:"Headshot", val_wr:"Win rate", val_kda:"K / D", val_acs2:"ACS",
+      val_recap_label:"Your match recap", val_you:"You", val_teammate:"Teammate",
+      val_c1_t:"Your progress dashboard", val_c1_d:"Rank, ACS, accuracy and win rate curves act after act. Your evolution reads at a glance, just like Rocket League.",
+      val_c2_t:"Post-match recap", val_c2_d:"Once the game ends, you review your performance and your team's. The lines that sting and the ones that improve, with no judgment on anyone.",
+      val_c3_t:"Personal overlay for your stream", val_c3_d:"Build your own Valorant overlay block by block, like on Rocket League, and show it on your game or stream. Your stats, your way.",
+      val_c4_t:"Your data, your control", val_c4_d:"Everything starts from your account through Riot Sign On. We only use the data you choose to connect. No live opponent rank or peak.",
+      val_c4_mock:"Secured by Riot Sign On. You authorize, you stay in control, you can disconnect anytime.",
+      val_note:"Valorant version in the works. The visuals above are mockups. Valorant and Riot Games are trademarks of Riot Games, Inc. L'Overtime is an independent product, not affiliated with or endorsed by Riot Games.",
+      price_kicker:"Pricing", price_title:"Simple pricing", price_sub:"Start free. Go PRO to unlock premium features. Cancel anytime.",
+      p_free_tag:"Free", p_free_note:"No license needed",
+      p_free_l1:"Broadcast overlay & scoreboard", p_free_l2:"Player overlay: W/L, MMR, streak", p_free_l3:"Scenes, transitions & end-of-match", p_free_btn:"Download",
+      p_rib:"Most flexible", p_m_tag:"PRO Monthly", per_month:"/ month", p_m_note:"Billed monthly", p_trial:"7-day free trial",
+      p_m_l1:"Everything in Free", p_m_l2:"Tournaments, brackets & remote score", p_m_l3:"Overlay builder & Twitch interaction", p_m_l4:"Progress, goals & coaching", p_getpro:"Go PRO",
+      p_6_tag:"PRO 6 months", per_6mo:"/ 6 mo", p_6_note:"≈ €2.33 / month", p_6_l1:"Everything in PRO", p_6_l2:"Save vs monthly", p_getpro2:"Go PRO",
+      p_y_tag:"PRO Annual", per_year:"/ year", p_y_note:"≈ €2.17 / month · best value", p_y_l1:"Everything in PRO", p_y_l2:"Best price", p_getpro3:"Go PRO",
+      faq_kicker:"FAQ", faq_title:"Frequently asked questions",
+      q1:"How does it work?", a1:"You launch the app, enable your overlay, and you're set. Whether you're just a player or a streamer, it shows on your game. Nothing else to install, no code.",
+      q2:"Who is it for?", a2:"Casters, players and coaches. Each has a dedicated space in the app, with its own tools.",
+      q3:"Do I need an account?", a3:"Not to get started: the free version works right away. PRO simply unlocks by pasting your license key.",
+      q4:"How do I activate PRO?", a4:"After purchase you get a license key to paste into the app. Subscriptions are handled by Lemon Squeezy.",
+      q5:"Can I cancel anytime?", a5:"Yes. The subscription has no commitment and can be canceled anytime from your Lemon Squeezy account.",
+      q6:"When is Valorant coming?", a6:"The Valorant version is in the works. It will start from your own account through Riot Sign On to track your progress and stats, and will never show opponents' live rank or peak.",
+      dl_title:"Download L'Overtime Manager", dl_sub:"Grab the latest Windows build. PRO unlocks by pasting your license key into the app after purchase.",
+      dl_cta1:"Download (Windows)", dl_cta2:"Join the Discord",
+      foot_legal:"Legal",
+      foot_trademark:"Rocket League is a trademark of Psyonix LLC; L'Overtime is an independent product, not affiliated with or endorsed by Psyonix.",
+      foot_trademark_riot:"Valorant and Riot Games are trademarks of Riot Games, Inc.; L'Overtime is an independent product, not affiliated with or endorsed by Riot Games.",
+      foot_trademark_pay:"Payments and subscriptions are handled by our Merchant of Record, Lemon Squeezy."
+    }
+  };
+  function applyLang(l){
+    if(!I18N[l]) l="en";
+    document.documentElement.lang=l;
+    document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(I18N[l][k]!=null)el.textContent=I18N[l][k];});
+    document.querySelectorAll('[data-i18n-html]').forEach(function(el){var k=el.getAttribute('data-i18n-html');if(I18N[l][k]!=null)el.innerHTML=I18N[l][k];});
+    document.getElementById('langLabel').textContent=(l==='fr'?'FR':'EN');
+    try{localStorage.setItem('ov_lang',l);}catch(e){}
+    if(window.__renderSoon)window.__renderSoon();
+    if(window.ScrollTrigger)ScrollTrigger.refresh();
+  }
+  (function(){
+    var saved=null;try{saved=localStorage.getItem('ov_lang');}catch(e){}
+    var initial=saved||((navigator.language||'en').toLowerCase().indexOf('fr')===0?'fr':'en');
+    applyLang(initial);
+    document.getElementById('langBtn').addEventListener('click',function(){var cur=document.documentElement.lang==='fr'?'fr':'en';applyLang(cur==='fr'?'en':'fr');});
+  })();
+
+  (function(){var bar=document.getElementById('scrollbar');function upd(){var h=document.documentElement.scrollHeight-window.innerHeight;bar.style.width=(h>0?(window.scrollY/h)*100:0)+"%";}window.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',upd);upd();})();
+
+  (function(){
+    var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var lenis=null;
+    if(window.Lenis && !reduce){
+      lenis=new Lenis({lerp:.1,smoothWheel:true});
+      if(window.gsap){lenis.on('scroll',function(){if(window.ScrollTrigger)ScrollTrigger.update();});gsap.ticker.add(function(t){lenis.raf(t*1000);});gsap.ticker.lagSmoothing(0);}
+      else{(function raf(t){lenis.raf(t);requestAnimationFrame(raf);})(0);}
+    }
+    if(!window.gsap || reduce) return;
+    gsap.registerPlugin(ScrollTrigger);
+    var isDesktop=window.matchMedia('(min-width: 901px)').matches;
+
+    // Hero travelling overlay
+    if(isDesktop){
+      var tl=gsap.timeline({scrollTrigger:{trigger:'#cine',start:'top top',end:'bottom bottom',scrub:.6,pin:'#cineStage',anticipatePin:1}});
+      tl.fromTo('#appwin',{scale:.6,rotationY:-28,rotationX:16,y:130,opacity:.3,filter:'blur(5px)'},
+        {scale:1,rotationY:0,rotationX:0,y:0,opacity:1,filter:'blur(0px)',ease:'power2.out',duration:1},0);
+      tl.from('.ovstat',{y:16,opacity:0,stagger:.12,duration:.5,ease:'power2.out'},.4);
+      tl.to('#appwin',{scale:.92,rotationY:16,y:-60,ease:'power2.in',duration:1},1);
+      tl.to('#cineCopy',{y:-70,opacity:0,duration:1,ease:'power2.in'},1);
+      tl.to('.cine-hint',{opacity:0,duration:.3},0);
+    } else {
+      gsap.from('#appwin',{y:30,opacity:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:'#appwin',start:'top 88%'}});
+    }
+
+    // Horizontal espaces slide
+    if(isDesktop){
+      var track=document.getElementById('hpinTrack');
+      if(track){
+        var getDist=function(){return Math.max(0, track.scrollWidth - window.innerWidth + 48);};
+        var hscroll=gsap.to(track,{x:function(){return -getDist();},ease:'none',
+          scrollTrigger:{trigger:'#hpin',start:'top top',end:function(){return '+='+getDist();},scrub:.5,invalidateOnRefresh:true}});
+        // per-panel progress bars, tied to the horizontal scroll
+        gsap.utils.toArray('.hpanel').forEach(function(p){
+          var bar=p.querySelector('.hprog i');
+          if(bar) gsap.fromTo(bar,{width:'0%'},{width:'100%',ease:'none',
+            scrollTrigger:{trigger:p,containerAnimation:hscroll,start:'left right',end:'right left',scrub:true}});
+        });
+      }
+    }
+
+    // Scène Valorant : une seule scène épinglée, chaque temps se monte puis se démonte en place
+    function renderSoon(){
+      var el=document.getElementById('soon3d'); if(!el) return;
+      var dict=I18N[document.documentElement.lang]||I18N.en;
+      var w=dict.soon_word||'BIENTÔT';
+      el.setAttribute('aria-label',w);
+      el.textContent='';
+      for(var i=0;i<w.length;i++){var s=document.createElement('span');s.textContent=w.charAt(i);el.appendChild(s);}
+    }
+    window.__renderSoon=renderSoon; renderSoon();
+
+    var wordLetters=gsap.utils.toArray('#val3d span');
+    var vcards=gsap.utils.toArray('#valgrid .valcard');
+    var soonLetters=gsap.utils.toArray('#soon3d span');
+    var vfroms=[{x:-170,rotationY:44},{x:170,rotationY:-44},{y:160,rotationX:48},{scale:.5,rotation:-8}];
+
+    if(isDesktop && wordLetters.length){
+      gsap.set('#vlayerCards',{opacity:0});
+      gsap.set('#vlayerSoon',{opacity:0});
+
+      var M=gsap.timeline({scrollTrigger:{trigger:'#valstageWrap',start:'top top',end:'bottom bottom',scrub:.6,pin:'#valstage',anticipatePin:1}});
+
+      // 1) VALORANT se construit
+      M.fromTo('#valburst',{opacity:0,scale:.5},{opacity:1,scale:1.1,duration:1,ease:'power2.out'},0);
+      M.fromTo(wordLetters,{rotationX:-100,z:-460,y:190,scale:.5,opacity:0,transformOrigin:'50% 100%'},
+        {rotationX:0,z:0,y:0,scale:1,opacity:1,stagger:.06,duration:1,ease:'back.out(1.7)'},.05);
+      M.to('#valflash',{opacity:1,duration:.1,ease:'power1.out'},.6);
+      M.to('#valflash',{opacity:0,duration:.5,ease:'power2.out'},.72);
+      M.to('#val3dScale',{scale:1.06,duration:.16,ease:'power2.out'},.6);
+      M.to('#val3dScale',{scale:1,duration:.5,ease:'elastic.out(1,.5)'},.78);
+      M.fromTo('#valBadge',{opacity:0,y:26,scale:.6},{opacity:1,y:0,scale:1,duration:.5,ease:'back.out(2)'},.85);
+      // 1b) VALORANT se déconstruit
+      M.to(wordLetters,{rotationX:90,y:-190,scale:.6,opacity:0,stagger:.05,duration:.8,ease:'power2.in'},2.05);
+      M.to('#valBadge',{opacity:0,y:-34,duration:.4,ease:'power2.in'},2.05);
+      M.to('#valburst',{opacity:0,scale:.7,duration:.7,ease:'power2.in'},2.05);
+      M.set('#vlayerWord',{opacity:0},2.95);
+
+      // 2) Les cartes se construisent
+      M.set('#vlayerCards',{opacity:1},2.95);
+      M.fromTo('#valTitle',{y:48,opacity:0},{y:0,opacity:1,duration:.6,ease:'power3.out'},3.0);
+      M.fromTo('#valSub',{y:34,opacity:0},{y:0,opacity:1,duration:.6,ease:'power3.out'},3.12);
+      vcards.forEach(function(c,i){
+        M.fromTo(c,Object.assign({opacity:0},vfroms[i%4]),
+          {opacity:1,x:0,y:0,rotationX:0,rotationY:0,rotation:0,scale:1,duration:.8,ease:'back.out(1.3)'}, 3.25 + i*0.42);
+      });
+      // 2b) Les cartes se déconstruisent
+      M.to('#valTitle',{opacity:0,y:-40,duration:.5,ease:'power2.in'},5.7);
+      M.to('#valSub',{opacity:0,y:-40,duration:.5,ease:'power2.in'},5.74);
+      vcards.forEach(function(c,i){
+        M.to(c,{opacity:0,y:-130,rotationX:62,scale:.82,duration:.6,ease:'power2.in'}, 5.7 + i*0.1);
+      });
+      M.set('#vlayerCards',{opacity:0},6.7);
+
+      // 3) BIENTÔT se construit (final)
+      M.set('#vlayerSoon',{opacity:1},6.7);
+      M.fromTo('#valburst',{opacity:0,scale:.5},{opacity:1,scale:1.1,duration:1,ease:'power2.out'},6.7);
+      M.fromTo(soonLetters,{rotationX:-100,z:-440,y:180,scale:.5,opacity:0,transformOrigin:'50% 100%'},
+        {rotationX:0,z:0,y:0,scale:1,opacity:1,stagger:.08,duration:1,ease:'back.out(1.7)'},6.8);
+      M.to('#valflash',{opacity:1,duration:.1,ease:'power1.out'},7.4);
+      M.to('#valflash',{opacity:0,duration:.5,ease:'power2.out'},7.52);
+      M.to('#soonScale',{scale:1.06,duration:.16,ease:'power2.out'},7.4);
+      M.to('#soonScale',{scale:1,duration:.5,ease:'elastic.out(1,.5)'},7.58);
+      M.to({},{duration:.7},8.1);
+    } else {
+      gsap.from(wordLetters,{scrollTrigger:{trigger:'#val3d',start:'top 82%'},rotationX:-90,y:60,scale:.6,opacity:0,stagger:.06,duration:.7,ease:'back.out(1.7)'});
+      gsap.from('#valBadge',{scrollTrigger:{trigger:'#val3d',start:'top 72%'},opacity:0,y:16,scale:.7,duration:.5,ease:'back.out(2)'});
+      gsap.from('#valTitle',{scrollTrigger:{trigger:'#valTitle',start:'top 90%'},y:28,opacity:0,duration:.6});
+      gsap.from('#valSub',{scrollTrigger:{trigger:'#valSub',start:'top 90%'},y:22,opacity:0,duration:.6});
+      vcards.forEach(function(c){ gsap.from(c,{scrollTrigger:{trigger:c,start:'top 88%'},y:40,opacity:0,duration:.6,ease:'power3.out'}); });
+      gsap.from(soonLetters,{scrollTrigger:{trigger:'#soon3d',start:'top 82%'},rotationX:-90,y:60,scale:.6,opacity:0,stagger:.08,duration:.7,ease:'back.out(1.7)'});
+    }
+
+    // generic reveals
+    gsap.utils.toArray('[data-rise]').forEach(function(el){
+      gsap.from(el,{scrollTrigger:{trigger:el,start:'top 90%'},y:40,opacity:0,duration:.7,ease:'power3.out',clearProps:'transform,opacity'});
+    });
+    gsap.utils.toArray('[data-stagger]').forEach(function(g){
+      gsap.from(g.children,{scrollTrigger:{trigger:g,start:'top 86%'},y:38,opacity:0,stagger:.08,duration:.6,ease:'power3.out',clearProps:'transform,opacity'});
+    });
+
+    window.addEventListener('load',function(){ ScrollTrigger.refresh(); });
+    setTimeout(function(){ ScrollTrigger.refresh(); }, 400);
+  })();
+</script>
+</body>
+</html>
