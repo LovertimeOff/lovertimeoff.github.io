@@ -117,7 +117,7 @@ h2{font-family:var(--disp);font-weight:400;font-size:clamp(24px,3vw,38px);line-h
 .gal-main{position:relative}
 .gal-main img{width:100%;aspect-ratio:16/9;object-fit:cover;transition:opacity .35s}
 .gal-thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
-.gal-thumbs button{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:6px;cursor:pointer;color:var(--muted);font:700 12.5px Inter;text-align:left;transition:all .2s}
+.gal-thumbs button{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:6px;cursor:pointer;color:var(--muted);font:700 12.5px Inter;text-align:left;transition:border-color .2s,box-shadow .2s,color .2s}
 .gal-thumbs button img{border-radius:8px;aspect-ratio:16/9;object-fit:cover;margin-bottom:6px;opacity:.8}
 .gal-thumbs button.on{border-color:rgba(152,76,255,.7);color:#fff;box-shadow:0 0 0 1px rgba(152,76,255,.4),0 10px 30px rgba(152,76,255,.25)}
 .gal-thumbs button.on img{opacity:1}
@@ -231,6 +231,69 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
 .lb.on{display:flex}
 .lb img{max-height:92vh;border-radius:12px;box-shadow:0 30px 100px rgba(0,0,0,.7)}
 
+/* ---------- scroll animations (activées par le script sur grand écran) ---------- */
+.scrollbar{position:fixed;top:0;left:0;height:2px;width:0;z-index:60;background:linear-gradient(90deg,var(--a),var(--b));box-shadow:0 0 14px rgba(152,76,255,.7)}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+.cine-hint{display:none}
+.hero.cine{height:calc(100vh - 66px);min-height:560px;padding-top:48px;overflow:hidden;position:relative}
+.hero.cine .shot-hero{transform-origin:50% 0;will-change:transform}
+.hero.cine .tilt{transform:none;transition:none}
+.hero.cine .float{opacity:0}
+.hero.cine .cine-hint{display:flex;position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:5;font-size:11px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.cine-hint .mouse{width:20px;height:32px;border:1.5px solid var(--muted);border-radius:12px;position:relative}
+.cine-hint .mouse::after{content:"";position:absolute;left:50%;top:6px;width:2px;height:6px;background:var(--muted);transform:translateX(-50%);border-radius:2px;animation:wheel 1.5s ease-in-out infinite}
+@keyframes wheel{0%{opacity:0;transform:translate(-50%,0)}30%{opacity:1}100%{opacity:0;transform:translate(-50%,10px)}}
+.hprog{display:none}
+#spaces.hmode{padding:0}
+#spaces.hmode .hstage{height:calc(100vh - 66px);min-height:600px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+#spaces.hmode .tabs{margin:22px auto 24px}
+#spaces.hmode .htrack{display:flex;gap:40px;text-align:left;will-change:transform}
+#spaces.hmode .panel{display:grid!important;flex:0 0 100%;animation:none;position:relative;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line2);border-radius:24px;padding:34px 38px 40px;overflow:hidden;opacity:.35;transform:scale(.96);transition:opacity .5s,transform .5s}
+#spaces.hmode .panel.on{opacity:1;transform:none}
+#spaces.hmode .panel::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--grad)}
+#spaces.hmode .panel .frame img{max-height:calc(100vh - 430px);width:100%;object-fit:cover;object-position:top}
+#spaces.hmode .panel .num{position:absolute;right:30px;top:18px;font-family:var(--disp);font-size:64px;line-height:1;color:transparent;-webkit-text-stroke:1.2px rgba(152,76,255,.45);pointer-events:none}
+#spaces.hmode .hprog{display:block;position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.06)}
+.hprog i{display:block;height:100%;width:0;background:var(--grad)}
+.panel .num{display:none}
+#spaces.hmode .panel .num{display:block}
+#spaces.hmode .panel>*{position:relative;z-index:1}
+#spaces.hmode .panel>.num{position:absolute;z-index:0}
+#spaces.hmode .panel>.hprog{position:absolute}
+
+/* Valorant, scène 3D */
+.valsec{position:relative;overflow:hidden}
+.valstage{position:relative;display:block;padding:40px 0;perspective:1000px}
+.valburst{position:absolute;left:50%;top:48%;width:130vw;height:130vw;transform:translate(-50%,-50%) scale(.5);border-radius:50%;opacity:0;pointer-events:none;background:radial-gradient(circle,rgba(255,70,85,.24),rgba(255,70,85,.05) 45%,transparent 62%)}
+.valflash{position:absolute;inset:0;opacity:0;pointer-events:none;background:radial-gradient(circle at 50% 52%,rgba(255,150,160,.42),transparent 58%)}
+.vlayer{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;margin:40px 0}
+.val3dscale{position:relative;z-index:2;transform-style:preserve-3d;will-change:transform}
+.val3d{display:flex;gap:.008em;transform-style:preserve-3d;animation:valfloat 7s ease-in-out infinite alternate}
+@keyframes valfloat{from{transform:rotateY(-9deg) rotateX(5deg)}to{transform:rotateY(9deg) rotateX(-3deg)}}
+.val3d span{display:inline-block;font-family:var(--disp);font-weight:400;font-size:clamp(46px,12vw,170px);line-height:.95;color:var(--val);transform-style:preserve-3d;backface-visibility:hidden;will-change:transform,opacity;text-shadow:1px 1px 0 #c12f3a,2px 2px 0 #a92732,3px 3px 0 #91202b,4px 5px 1px rgba(0,0,0,.4),0 0 26px rgba(255,70,85,.42)}
+.soon3d span{font-size:clamp(40px,9.5vw,130px)}
+html[lang=en] #soonFr,html[lang=fr] #soonEn{display:none}
+.soon-badge{display:inline-block;font-size:12px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--val),#ff7a54);padding:5px 12px;border-radius:8px;letter-spacing:.1em}
+.valgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:26px;perspective:1300px;text-align:left}
+.valcard{background:linear-gradient(180deg,#17121a,#110c15);border:1px solid rgba(255,70,85,.18);border-radius:18px;padding:20px;position:relative;overflow:hidden;transform-style:preserve-3d;will-change:transform,opacity}
+.valcard::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--val),#ff9d6b)}
+.valcard h4{margin:2px 0 6px;font-size:16.5px}.valcard p{margin:0;color:var(--muted);font-size:13.5px}
+.valmock{background:linear-gradient(180deg,#120d16,#0b0710);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px;min-height:96px}
+.vstat{display:flex;gap:8px;flex-wrap:wrap}
+.vchip{background:rgba(10,12,20,.9);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-weight:900;font-size:13px}
+.vchip small{display:block;color:var(--muted);font-weight:700;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;margin-top:1px}
+.vrank{display:inline-flex;align-items:center;background:linear-gradient(135deg,var(--val),#ff7a54);color:#fff;font-weight:900;border-radius:9px;padding:6px 11px;font-size:13px}
+.vrow{display:flex;justify-content:space-between;gap:8px;padding:6px 9px;border-radius:8px;font-size:12px}
+.vrow.me{background:rgba(255,70,85,.14);border:1px solid rgba(255,70,85,.4);font-weight:800}
+.vrow.them{background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--muted)}
+#valorant.val-pin{padding:0}
+#valorant.val-pin .valstage{height:calc(100vh - 66px);min-height:600px;overflow:hidden;padding:0}
+#valorant.val-pin .vlayer{position:absolute;inset:0;margin:0}
+#valorant .fine{text-align:center;max-width:820px;margin:20px auto 0}
+@media (max-width:1100px){.valgrid{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.valgrid{grid-template-columns:1fr}}
+
 @media (max-width:980px){
   .links{display:none}.burger{display:block;margin-left:auto}
   .links.open{display:flex;flex-direction:column;position:absolute;top:66px;left:0;right:0;background:#0b0a12;padding:18px 4vw;border-bottom:1px solid var(--line)}
@@ -253,6 +316,7 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
 </head>
 <body>
 <div class="amb"></div><div class="grain"></div>
+<div class="scrollbar" id="scrollbar"></div>
 
 <header class="nav">
   <div class="wrap">
@@ -273,8 +337,9 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
 
 <main id="top">
   <!-- HERO -->
-  <section class="hero">
+  <section class="hero" id="hero">
     <div class="wrap">
+      <div id="heroCopy">
       <div class="pill rv"><b data-i18n="hero.badge">Nouveau</b><span data-i18n="hero.badgeTxt">Tutos guidés, lecteur 3D et commandes de chat</span></div>
       <h1 class="rv d1" data-i18n="hero.title">Toute ta scène <span class="gtxt">Rocket League</span>, dans une seule appli</h1>
       <p class="lead rv d2" data-i18n="hero.lead">Diffuse comme les pros, suis ta progression match après match et coache ton équipe. Caster, joueur ou coach, L'Overtime Manager s'adapte à ton rôle.</p>
@@ -283,8 +348,9 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
         <a class="btn ghost" href="#spaces" data-i18n="hero.cta2">Voir ce qu'elle fait</a>
       </div>
       <div class="meta rv d3" data-i18n="hero.meta">Windows 10 / 11 · Gratuit pour démarrer · PRO sans engagement</div>
+      </div>
 
-      <div class="shot-hero rv">
+      <div class="shot-hero rv" id="shot">
         <div class="tilt" id="tilt">
           <div class="frame"><div class="bar"><i></i><i></i><i></i><span>L'Overtime Manager · Régie</span></div>
             <img src="img/app-regie.jpg" alt="Régie de L'Overtime Manager" class="zoomable">
@@ -295,17 +361,21 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
         <div class="float f3"><small>!rank</small><strong>Champion II</strong><div class="s">1 287 MMR</div></div>
       </div>
 
+    </div>
+    <div class="cine-hint"><span class="mouse"></span><span data-i18n="hero.scroll">Défile</span></div>
+  </section>
+  <div class="wrap">
       <div class="strip">
         <span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 3 6v6c0 5 3.8 9.7 9 10 5.2-.3 9-5 9-10V6z"/></svg><span data-i18n="strip.1">Basée sur l'API Stats officielle de Rocket League</span></span>
         <span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span data-i18n="strip.2">Données en direct, sans plugin</span></span>
         <span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v12H5.2L4 17.2zM7 8h10v2H7zm0 4h7v2H7z"/></svg><span data-i18n="strip.3">Français et anglais</span></span>
         <span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 5v5l4 2-1 1.7-5-2.7V7z"/></svg><span data-i18n="strip.4">Mises à jour automatiques</span></span>
       </div>
-    </div>
-  </section>
+  </div>
 
   <!-- SPACES -->
   <section id="spaces">
+    <div class="hstage" id="hstage">
     <div class="wrap center">
       <div class="kicker rv" data-i18n="spaces.k">Trois espaces, une appli</div>
       <h2 class="rv" data-i18n="spaces.t">Un outil pour toute la scène</h2>
@@ -315,8 +385,11 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
         <button data-tab="player">🎮 <span data-i18n="spaces.player">Joueur</span></button>
         <button data-tab="coach">📋 <span>Coach</span></button>
       </div>
+    </div>
+    <div class="wrap center">
+      <div class="htrack" id="htrack">
 
-      <div class="panel on" data-panel="caster">
+      <div class="panel on" data-panel="caster"><span class="num">01</span>
         <div>
           <h3 data-i18n="caster.t">Une diffusion de pro, pilotée d'un seul écran</h3>
           <p data-i18n="caster.p">La Régie réunit tout ce qu'il faut pendant le live. Le scorebug suit le jeu tout seul, toi tu choisis la scène, lances une pop-up de stats ou la musique.</p>
@@ -328,9 +401,10 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
           </ul>
         </div>
         <div class="frame rv"><img src="img/ov-overtime.jpg" alt="Overlay de match" class="zoomable"></div>
+        <div class="hprog"><i></i></div>
       </div>
 
-      <div class="panel" data-panel="player">
+      <div class="panel" data-panel="player"><span class="num">02</span>
         <div>
           <h3 data-i18n="player.t">Ta session, ton MMR, ta progression</h3>
           <p data-i18n="player.p">L'appli suit chaque partie toute seule. Victoires, MMR gagné, séries, records et courbes, avec un overlay prêt pour ton stream.</p>
@@ -342,9 +416,10 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
           </ul>
         </div>
         <div class="frame rv"><img src="img/app-stats.jpg" alt="Statistiques joueur" class="zoomable"></div>
+        <div class="hprog"><i></i></div>
       </div>
 
-      <div class="panel" data-panel="coach">
+      <div class="panel" data-panel="coach"><span class="num">03</span>
         <div>
           <h3 data-i18n="coach.t">Analyse, explique, fais progresser</h3>
           <p data-i18n="coach.p">Rejoue les matchs de tes joueurs en 2D ou en 3D, compare leurs stats sur un BO et prépare tes tactiques étape par étape.</p>
@@ -356,7 +431,10 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
           </ul>
         </div>
         <div class="frame rv"><img src="img/app-replay3d.jpg" alt="Lecteur 3D" class="zoomable"></div>
+        <div class="hprog"><i></i></div>
       </div>
+      </div>
+    </div>
     </div>
   </section>
 
@@ -499,26 +577,62 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
         <div class="feat rv d2"><div class="ico">🎛️</div><h4 data-i18n="g.6t">Stream Deck et raccourcis</h4><p data-i18n="g.6p">Plugin Elgato officiel, raccourcis clavier pour chaque action de la Régie.</p></div>
         <div class="feat rv"><div class="ico">🎯</div><h4 data-i18n="g.7t">Superposition en jeu</h4><p data-i18n="g.7p">Ton overlay par-dessus Rocket League, même sans OBS, avec l'ATH du jeu masqué.</p></div>
         <div class="feat rv d1"><div class="ico">🤝</div><h4 data-i18n="g.8t">Session coach à distance</h4><p data-i18n="g.8p">Le coach et ses joueurs voient le même replay, le même tableau et les mêmes dessins en direct.</p></div>
-        <div class="feat rv d2"><div class="ico">💾</div><h4 data-i18n="g.9t">Presets et sauvegardes</h4><p data-i18n="g.9p">Enregistre tout ton habillage en un preset, change de look en un clic, annule si besoin.</p></div>
+        <div class="feat rv d2"><div class="ico">💾</div><h4 data-i18n="g.9t">Presets et sauvegardes</h4><p data-i18n="g.9p">Enregistre tout ton overlay en un preset, change de look en un clic, annule si besoin.</p></div>
       </div>
     </div>
   </section>
 
   <!-- VALORANT -->
-  <section id="valorant">
-    <div class="wrap">
-      <div class="val rv">
-        <div class="kicker">Valorant <span class="badge-soon" data-i18n="v.soon">EN PRÉPARATION</span></div>
-        <h2 data-i18n="v.t">Le même ADN, bientôt sur Valorant</h2>
-        <p class="sub" style="margin-top:10px" data-i18n="v.s">Tes stats et ta progression à partir de ton propre compte, connecté via Riot. Des données à toi, jamais du scouting adverse en direct.</p>
-        <div class="vgrid">
-          <div class="vcard"><h4 data-i18n="v.1t">Ton tableau de progression</h4><p data-i18n="v.1p">Rang, ACS, précision et winrate, acte après acte.</p><div class="vstats"><div><b>254</b>ACS</div><div><b>1.3</b>K/D</div><div><b>57%</b>Winrate</div></div></div>
-          <div class="vcard"><h4 data-i18n="v.2t">Récap post-match</h4><p data-i18n="v.2p">Ta performance et celle de ton équipe, sans jugement sur personne.</p></div>
-          <div class="vcard"><h4 data-i18n="v.3t">Overlay perso</h4><p data-i18n="v.3p">Compose ton overlay Valorant bloc par bloc, comme sur Rocket League.</p></div>
+  <section id="valorant" class="valsec">
+    <div class="valstage" id="valstage">
+      <div class="valburst" id="valburst"></div><div class="valflash" id="valflash"></div>
+
+      <div class="vlayer" id="vlayerWord">
+        <div class="val3dscale" id="val3dScale"><div class="val3d" id="val3d" aria-label="Valorant"><span>V</span><span>A</span><span>L</span><span>O</span><span>R</span><span>A</span><span>N</span><span>T</span></div></div>
+        <div class="soon-badge" id="valBadge" data-i18n="v.soon">EN PRÉPARATION</div>
+      </div>
+
+      <div class="vlayer" id="vlayerCards">
+        <div class="wrap center">
+          <div class="kicker" style="color:var(--val)" id="valKick" data-i18n="v.k">Nouveau jeu</div>
+          <h2 id="valTitle" data-i18n="v.t">Le même ADN, bientôt sur Valorant</h2>
+          <p class="sub" id="valSub" data-i18n="v.s">Tes stats et ta progression à partir de ton propre compte, connecté via Riot. Des données à toi, jamais du scouting adverse en direct.</p>
+          <div class="valgrid" id="valgrid">
+            <div class="valcard">
+              <div class="valmock">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px"><span class="vrank" translate="no">Immortal 2</span><span style="font-size:12px;font-weight:800;color:#3bd16f;background:rgba(59,209,111,.12);padding:2px 8px;border-radius:999px" translate="no">+84 RR</span></div>
+                <div class="vstat"><div class="vchip">254<small>ACS</small></div><div class="vchip">1.3<small>K/D</small></div><div class="vchip">57%<small>Winrate</small></div></div>
+              </div>
+              <h4 data-i18n="v.1t">Ton tableau de progression</h4><p data-i18n="v.1p">Rang, ACS, précision et winrate, acte après acte.</p>
+            </div>
+            <div class="valcard">
+              <div class="valmock" style="display:flex;flex-direction:column;gap:5px">
+                <div class="vrow me"><span data-i18n="v.you">Toi</span><span translate="no">28 / 14 / 6 · 268 ACS</span></div>
+                <div class="vrow them"><span data-i18n="v.mate">Coéquipier</span><span translate="no">19 / 16 / 9 · 201 ACS</span></div>
+                <div class="vrow them"><span data-i18n="v.mate">Coéquipier</span><span translate="no">12 / 17 / 11 · 154 ACS</span></div>
+              </div>
+              <h4 data-i18n="v.2t">Récap post-match</h4><p data-i18n="v.2p">Ta performance et celle de ton équipe, sans jugement sur personne.</p>
+            </div>
+            <div class="valcard">
+              <div class="valmock"><div class="vstat" style="align-items:center"><div class="vchip">28 - 14<small>K / D</small></div><div class="vchip">268<small>ACS</small></div><span class="vrank" translate="no">Jett</span></div></div>
+              <h4 data-i18n="v.3t">Overlay perso</h4><p data-i18n="v.3p">Compose ton overlay Valorant bloc par bloc, comme sur Rocket League.</p>
+            </div>
+            <div class="valcard">
+              <div class="valmock" style="display:flex;align-items:center;gap:12px"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#ff4655" stroke-width="2" style="flex:0 0 auto"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg><span style="font-size:12.5px;color:var(--muted);line-height:1.5" data-i18n="v.4m">Connexion sécurisée par Riot Sign On. Tu peux te déconnecter quand tu veux.</span></div>
+              <h4 data-i18n="v.4t">Tes données, ton contrôle</h4><p data-i18n="v.4p">Tout part de ton compte via Riot Sign On. Jamais de rang ni de peak adverse en direct.</p>
+            </div>
+          </div>
         </div>
-        <p class="fine" data-i18n="v.fine">Version Valorant en préparation, connexion par Riot Sign On. Valorant et Riot Games sont des marques de Riot Games, Inc. L'Overtime est un produit indépendant, sans affiliation ni approbation de Riot Games.</p>
+      </div>
+
+      <div class="vlayer" id="vlayerSoon">
+        <div class="val3dscale" id="soonScale">
+          <div class="val3d soon3d" id="soonFr" aria-label="Bientôt"><span>B</span><span>I</span><span>E</span><span>N</span><span>T</span><span>Ô</span><span>T</span></div>
+          <div class="val3d soon3d" id="soonEn" aria-label="Soon"><span>S</span><span>O</span><span>O</span><span>N</span></div>
+        </div>
       </div>
     </div>
+    <div class="wrap"><p class="fine" data-i18n="v.fine">Version Valorant en préparation, connexion par Riot Sign On. Les visuels ci-dessus sont des maquettes. Valorant et Riot Games sont des marques de Riot Games, Inc. L'Overtime est un produit indépendant, sans affiliation ni approbation de Riot Games.</p></div>
   </section>
 
   <!-- PRICING -->
@@ -600,6 +714,9 @@ footer{border-top:1px solid var(--line);padding:40px 0 50px;margin-top:80px;colo
 
 <div class="lb" id="lb"><img alt=""></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
 <script>
 /* ------------------------------ traductions ------------------------------ */
 const EN = {
@@ -644,9 +761,9 @@ const EN = {
   "g.7t":"In-game overlay","g.7p":"Your overlay on top of Rocket League, even without OBS, with the game HUD hidden.",
   "g.8t":"Remote coaching session","g.8p":"The coach and players see the same replay, board and drawings live.",
   "g.9t":"Presets and backups","g.9p":"Save your whole look as a preset, switch styles in one click, undo if needed.",
-  "v.t":"The same DNA, coming to Valorant","v.soon":"IN PROGRESS","v.s":"Your stats and progress from your own account, connected through Riot. Your data, never live scouting of opponents.",
+  "v.t":"The same DNA, coming to Valorant","v.soon":"IN PROGRESS","v.k":"New game","v.you":"You","v.mate":"Teammate","v.4m":"Secured by Riot Sign On. You can disconnect anytime.","v.4t":"Your data, your control","v.4p":"Everything starts from your account through Riot Sign On. Never any live opponent rank or peak.","hero.scroll":"Scroll","v.s":"Your stats and progress from your own account, connected through Riot. Your data, never live scouting of opponents.",
   "v.1t":"Your progress board","v.1p":"Rank, ACS, accuracy and winrate, act after act.","v.2t":"Post-match recap","v.2p":"Your performance and your team's, without judging anyone.","v.3t":"Custom overlay","v.3p":"Build your Valorant overlay block by block, just like on Rocket League.",
-  "v.fine":"Valorant version in progress, sign-in through Riot Sign On. Valorant and Riot Games are trademarks of Riot Games, Inc. L'Overtime is an independent product, not affiliated with or endorsed by Riot Games.",
+  "v.fine":"Valorant version in progress, sign-in through Riot Sign On. The visuals above are mockups. Valorant and Riot Games are trademarks of Riot Games, Inc. L'Overtime is an independent product, not affiliated with or endorsed by Riot Games.",
   "pr.k":"Pricing","pr.t":"Free to start, PRO whenever you want","pr.s":"No commitment, no account to create. PRO unlocks when you paste your license key in the app.",
   "pr.free":"Free","pr.freeper":"No license needed","pr.f1":"Broadcast overlay and scoreboard","pr.f2":"Player overlay and session tracking","pr.f3":"Scenes, transitions and end of match","pr.f4":"2D and 3D replay viewer","pr.dl":"Download",
   "pr.trial":"7-day trial","pr.m":"PRO Monthly","pr.mo":"/ month","pr.mper":"Billed monthly","pr.p1":"Everything in Free","pr.p2":"Overlay builder and presets","pr.p3":"Tournaments, brackets and remote scoring","pr.p4":"Twitch interaction and chat commands","pr.p5":"Progress, goals and coaching","pr.go":"Go PRO",
@@ -678,20 +795,22 @@ function setLang(l) {
   document.querySelectorAll(".lang button").forEach((b) => b.classList.toggle("on", b.dataset.lang === lang));
   const on = document.querySelector(".gal-thumbs button.on"); if (on) showGal(on);
   try { localStorage.setItem("lo_lang", lang); } catch (e) {}
+  if (window.ScrollTrigger) setTimeout(() => ScrollTrigger.refresh(), 60);
 }
 document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
 let saved = null; try { saved = localStorage.getItem("lo_lang"); } catch (e) {}
 setLang(saved || ((navigator.language || "fr").toLowerCase().startsWith("fr") ? "fr" : "en"));
 
 /* ------------------------------ onglets espaces ------------------------------ */
-document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => {
+document.querySelectorAll(".tabs button").forEach((b, i) => b.addEventListener("click", () => {
+  if (window.__hTab) { window.__hTab(i); return; }
   document.querySelectorAll(".tabs button").forEach((x) => x.classList.toggle("on", x === b));
   document.querySelectorAll(".panel").forEach((p) => { const on = p.dataset.panel === b.dataset.tab; p.classList.toggle("on", on); if (on) p.querySelectorAll(".rv").forEach((r) => r.classList.add("in")); });
 }));
 
 /* ------------------------------ galerie overlays ------------------------------ */
-const galImg = document.getElementById("galImg");
 function showGal(b) {
+  const galImg = document.getElementById("galImg");
   const D = lang === "en" ? EN : FR;
   document.querySelectorAll(".gal-thumbs button").forEach((x) => x.classList.toggle("on", x === b));
   galImg.style.opacity = 0;
@@ -702,9 +821,9 @@ function showGal(b) {
 document.querySelectorAll(".gal-thumbs button").forEach((b) => b.addEventListener("click", () => showGal(b)));
 
 /* ------------------------------ apparitions ------------------------------ */
+if (!("IntersectionObserver" in window)) document.querySelectorAll(".rv").forEach((el) => el.classList.add("in"));
 const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 });
 document.querySelectorAll(".rv,#mission").forEach((el) => io.observe(el));
-setTimeout(() => document.getElementById("tilt").classList.add("in"), 300);
 
 /* ------------------------------ démo du chat ------------------------------ */
 const chat = document.getElementById("chatDemo");
@@ -722,6 +841,135 @@ document.querySelectorAll(".zoomable").forEach((img) => img.addEventListener("cl
 lb.addEventListener("click", () => lb.classList.remove("on"));
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") lb.classList.remove("on"); });
 document.querySelectorAll("#links a").forEach((a) => a.addEventListener("click", () => document.getElementById("links").classList.remove("open")));
+
+/* ------------------------------ barre de progression ------------------------------ */
+(() => {
+  const bar = document.getElementById("scrollbar");
+  const upd = () => { const h = document.documentElement.scrollHeight - innerHeight; bar.style.width = (h > 0 ? (scrollY / h) * 100 : 0) + "%"; };
+  addEventListener("scroll", upd, { passive: true }); addEventListener("resize", upd); upd();
+})();
+
+/* ------------------------------ animations au défilement ------------------------------ */
+(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const NAV = 66;
+  let lenis = null;
+  if (window.Lenis && !reduce) {
+    lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    document.documentElement.style.scrollBehavior = "auto";
+    if (window.gsap) {
+      lenis.on("scroll", () => { if (window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add((t) => lenis.raf(t * 1000)); gsap.ticker.lagSmoothing(0);
+    } else { const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); }; requestAnimationFrame(raf); }
+  }
+  const goTo = (y) => { if (lenis) lenis.scrollTo(y, { duration: 1.2 }); else scrollTo({ top: y, behavior: "smooth" }); };
+  document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener("click", (e) => {
+    const id = a.getAttribute("href"); const t = id === "#top" ? null : document.querySelector(id);
+    if (id !== "#top" && !t) return;
+    e.preventDefault();
+    goTo(t ? t.getBoundingClientRect().top + scrollY - NAV + 1 : 0);
+  }));
+
+  if (!window.gsap || !window.ScrollTrigger || reduce) { document.getElementById("tilt").classList.add("in"); return; }
+  gsap.registerPlugin(ScrollTrigger);
+  const big = matchMedia("(min-width: 981px) and (min-height: 620px)").matches;
+  const noRv = (el) => { if (el) { el.classList.remove("rv"); el.classList.add("in"); } };
+
+  /* 1) Hero cinéma : la Régie se redresse et vient remplir l'écran */
+  if (big) {
+    const hero = document.getElementById("hero"), copy = document.getElementById("heroCopy"), shot = document.getElementById("shot");
+    hero.classList.add("cine"); noRv(shot); document.getElementById("tilt").classList.add("in");
+    const avail = () => innerHeight - NAV;
+    const top0 = () => 48 + copy.offsetHeight + 56;
+    const fit = () => Math.min(1, (avail() - 56) / shot.offsetHeight);
+    gsap.set(shot, { transformPerspective: 1600, transformOrigin: "50% 0%" });
+    const tl = gsap.timeline({ scrollTrigger: { trigger: hero, start: "top " + NAV + "px", end: "+=120%", scrub: 0.6, pin: true, anticipatePin: 1, invalidateOnRefresh: true } });
+    tl.fromTo(shot, { rotationX: 26, scale: 0.88, y: 0, opacity: 0.75, filter: "blur(2px)" },
+      { rotationX: 0, scale: () => fit(), y: () => (avail() - shot.offsetHeight * fit()) / 2 - top0(), opacity: 1, filter: "blur(0px)", duration: 1, ease: "power2.out" }, 0);
+    tl.to(copy, { y: -110, opacity: 0, duration: 0.55, ease: "power2.in" }, 0);
+    tl.to(".cine-hint", { opacity: 0, duration: 0.15 }, 0);
+    tl.to(".hero .float", { opacity: 1, stagger: 0.14, duration: 0.3, ease: "power1.out" }, 0.62);
+    tl.to({}, { duration: 0.35 });
+  } else {
+    setTimeout(() => document.getElementById("tilt").classList.add("in"), 300);
+  }
+
+  /* 2) Les trois espaces défilent à l'horizontale */
+  if (big) {
+    const sec = document.getElementById("spaces"), stage = document.getElementById("hstage"), track = document.getElementById("htrack");
+    const panels = [...track.querySelectorAll(".panel")], tabs = [...sec.querySelectorAll(".tabs button")];
+    sec.classList.add("hmode"); sec.querySelectorAll(".rv").forEach(noRv);
+    const step = () => panels[0].offsetWidth + 40;
+    const bars = panels.map((p) => p.querySelector(".hprog i"));
+    const T = [0, 1.9, 3.8];
+    const tl = gsap.timeline({ scrollTrigger: { trigger: stage, start: "top " + NAV + "px", end: () => "+=" + innerHeight * 2.2, scrub: 0.5, pin: true, anticipatePin: 1, invalidateOnRefresh: true,
+      onUpdate: (st) => {
+        const t = st.progress * 3.8, cur = t < 1.1 ? 0 : t < 2.7 ? 1 : 2;
+        panels.forEach((p, i) => p.classList.toggle("on", i === cur));
+        tabs.forEach((b, i) => b.classList.toggle("on", i === cur));
+      } } });
+    tl.to(track, { x: () => -step(), duration: 1, ease: "power2.inOut" }, 0.6);
+    tl.to(track, { x: () => -2 * step(), duration: 1, ease: "power2.inOut" }, 2.2);
+    tl.fromTo(bars[0], { width: "0%" }, { width: "100%", duration: 1.1, ease: "none" }, 0);
+    tl.fromTo(bars[1], { width: "0%" }, { width: "100%", duration: 1.6, ease: "none" }, 1.1);
+    tl.fromTo(bars[2], { width: "0%" }, { width: "100%", duration: 1.1, ease: "none" }, 2.7);
+    window.__hTab = (i) => { const st = tl.scrollTrigger; goTo(st.start + (st.end - st.start) * (T[i] / 3.8) + (i === 2 ? -2 : 1)); };
+  }
+
+  /* 3) Valorant : le mot se construit, les cartes arrivent, puis BIENTÔT */
+  const word = gsap.utils.toArray("#val3d span"), cards = gsap.utils.toArray("#valgrid .valcard"), soon = gsap.utils.toArray(".soon3d span");
+  const froms = [{ x: -170, rotationY: 44 }, { y: 160, rotationX: 48 }, { y: 160, rotationX: 48 }, { x: 170, rotationY: -44 }];
+  if (big) {
+    const sec = document.getElementById("valorant");
+    sec.classList.add("val-pin"); sec.querySelectorAll("#valstage .rv").forEach(noRv);
+    gsap.set(["#vlayerCards", "#vlayerSoon"], { opacity: 0 });
+    const M = gsap.timeline({ scrollTrigger: { trigger: "#valstage", start: "top " + NAV + "px", end: "+=340%", scrub: 0.6, pin: true, anticipatePin: 1 } });
+    M.fromTo("#valburst", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1.1, duration: 1, ease: "power2.out" }, 0);
+    M.fromTo(word, { rotationX: -100, z: -460, y: 190, scale: 0.5, opacity: 0, transformOrigin: "50% 100%" },
+      { rotationX: 0, z: 0, y: 0, scale: 1, opacity: 1, stagger: 0.06, duration: 1, ease: "back.out(1.7)" }, 0.05);
+    M.to("#valflash", { opacity: 1, duration: 0.1 }, 0.6).to("#valflash", { opacity: 0, duration: 0.5 }, 0.72);
+    M.to("#val3dScale", { scale: 1.06, duration: 0.16 }, 0.6).to("#val3dScale", { scale: 1, duration: 0.5, ease: "elastic.out(1,.5)" }, 0.78);
+    M.fromTo("#valBadge", { opacity: 0, y: 26, scale: 0.6 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(2)" }, 0.85);
+    M.to(word, { rotationX: 90, y: -190, scale: 0.6, opacity: 0, stagger: 0.05, duration: 0.8, ease: "power2.in" }, 2.05);
+    M.to("#valBadge", { opacity: 0, y: -34, duration: 0.4, ease: "power2.in" }, 2.05);
+    M.to("#valburst", { opacity: 0, scale: 0.7, duration: 0.7, ease: "power2.in" }, 2.05);
+    M.set("#vlayerWord", { opacity: 0 }, 2.95).set("#vlayerCards", { opacity: 1 }, 2.95);
+    M.fromTo("#valKick", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 2.95);
+    M.fromTo("#valTitle", { y: 48, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 3.0);
+    M.fromTo("#valSub", { y: 34, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 3.12);
+    cards.forEach((c, i) => M.fromTo(c, { opacity: 0, ...froms[i % 4] }, { opacity: 1, x: 0, y: 0, rotationX: 0, rotationY: 0, duration: 0.8, ease: "back.out(1.3)" }, 3.25 + i * 0.35));
+    M.to(["#valKick", "#valTitle", "#valSub"], { opacity: 0, y: -40, duration: 0.5, stagger: 0.04, ease: "power2.in" }, 5.6);
+    cards.forEach((c, i) => M.to(c, { opacity: 0, y: -130, rotationX: 62, scale: 0.82, duration: 0.6, ease: "power2.in" }, 5.6 + i * 0.1));
+    M.set("#vlayerCards", { opacity: 0 }, 6.6).set("#vlayerSoon", { opacity: 1 }, 6.6);
+    M.fromTo("#valburst", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1.1, duration: 1, ease: "power2.out", immediateRender: false }, 6.6);
+    M.fromTo(soon, { rotationX: -100, z: -440, y: 180, scale: 0.5, opacity: 0, transformOrigin: "50% 100%" },
+      { rotationX: 0, z: 0, y: 0, scale: 1, opacity: 1, stagger: 0.08, duration: 1, ease: "back.out(1.7)" }, 6.7);
+    M.to("#valflash", { opacity: 1, duration: 0.1 }, 7.3).to("#valflash", { opacity: 0, duration: 0.5 }, 7.42);
+    M.to("#soonScale", { scale: 1.06, duration: 0.16 }, 7.3).to("#soonScale", { scale: 1, duration: 0.5, ease: "elastic.out(1,.5)" }, 7.48);
+    M.to({}, { duration: 0.7 }, 8.0);
+  } else {
+    gsap.from(word, { scrollTrigger: { trigger: "#val3d", start: "top 85%" }, rotationX: -90, y: 60, scale: 0.6, opacity: 0, stagger: 0.06, duration: 0.7, ease: "back.out(1.7)" });
+    gsap.from(soon, { scrollTrigger: { trigger: "#soonScale", start: "top 85%" }, rotationX: -90, y: 60, scale: 0.6, opacity: 0, stagger: 0.08, duration: 0.7, ease: "back.out(1.7)" });
+    cards.forEach((c) => gsap.from(c, { scrollTrigger: { trigger: c, start: "top 90%" }, y: 40, opacity: 0, duration: 0.6, ease: "power3.out" }));
+  }
+
+  /* 4) Captures des fonctionnalités : elles pivotent vers toi en arrivant */
+  if (big) {
+    document.querySelectorAll(".split .frame").forEach((f) => {
+      noRv(f);
+      const rev = f.closest(".split").classList.contains("rev");
+      gsap.fromTo(f, { rotationY: rev ? 16 : -16, rotationX: 6, y: 80, scale: 0.92, opacity: 0.25, transformPerspective: 1400 },
+        { rotationY: 0, rotationX: 0, y: 0, scale: 1, opacity: 1, ease: "power2.out", scrollTrigger: { trigger: f, start: "top 98%", end: "top 40%", scrub: 0.6 } });
+    });
+    const g = document.querySelector(".gal-main"); noRv(document.querySelector(".gal"));
+    gsap.fromTo(g, { scale: 0.86, rotationX: 14, opacity: 0.4, transformPerspective: 1600, transformOrigin: "50% 100%" },
+      { scale: 1, rotationX: 0, opacity: 1, ease: "power2.out", scrollTrigger: { trigger: g, start: "top 95%", end: "top 30%", scrub: 0.6 } });
+    gsap.fromTo(".gal-thumbs button", { y: 40, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.07, duration: 0.6, ease: "power3.out", scrollTrigger: { trigger: ".gal-thumbs", start: "top 92%" } });
+  }
+
+  addEventListener("load", () => ScrollTrigger.refresh());
+  setTimeout(() => ScrollTrigger.refresh(), 400);
+})();
 </script>
 </body>
 </html>
